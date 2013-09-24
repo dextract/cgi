@@ -1,4 +1,3 @@
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -28,18 +27,24 @@ public class DemoXORPanel extends JPanel {
 				Graphics2D g = (Graphics2D) getGraphics();
 				
 				exited = false;
-				
-				if(existeLinha && grabbedPoint !=null) 
+				if( (linhaPresa) || (existeLinha && grabbedPoint !=null) )  {
+					g.setColor(Color.yellow);
 					g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
+					g.setColor(Color.black);
+				}
+				
 			}
 			
 			public void mouseExited(MouseEvent e) {
 				Graphics2D g = (Graphics2D) getGraphics();
 				
 				exited = true;
+				if(existeLinha && grabbedPoint !=null) {
+					g.setColor(Color.yellow);
+					g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
+					g.setColor(Color.black);
+				}
 				
-				if(existeLinha && grabbedPoint !=null)
-					g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);			
 			}
 			
 			
@@ -59,17 +64,13 @@ public class DemoXORPanel extends JPanel {
 				int yPos = e.getY();
 				
 
-				for(Point p: points) {
-					
-					//clicar numa vizinhança de um ponto
-					if(	Math.abs(xPos-p.getX())<=5 &&
+				//clicar numa vizinhanÃ§a de um ponto
+				for(Point p: points)
+					if(	Math.abs(xPos-p.getX())<=5 && 
 						Math.abs(yPos-p.getY())<=5 )
-						grabbedPoint = p;
-						
-				}
+							grabbedPoint = p;
 				
 				Graphics2D g = (Graphics2D) getGraphics();
-				
 				
 				
 				if(linhaPresa && nPoints==1) {	// Estamos a acabar uma linha...
@@ -109,7 +110,7 @@ public class DemoXORPanel extends JPanel {
 			
 			public void mouseDragged(MouseEvent e) {
 				
-				if(nPoints > 1) return; //ainda não se finalizou a linha por isso não deve poder arrastar pontos
+				if(nPoints > 1) return; //ainda nÃ£o se finalizou a linha por isso nÃ£o deve poder arrastar pontos
 				
 				Graphics2D g = (Graphics2D) getGraphics();
 				
@@ -185,12 +186,12 @@ public class DemoXORPanel extends JPanel {
 				g2.setColor(Color.black);
 				
 				drawSquare(fp.getX(), fp.getY(), g2);
-				
-				if(sp.isLast())
+				if(i==points.size()-2)
 					drawSquare(sp.getX(), sp.getY(), g2);
 				
-				drawBoundingBox(g2);
 			}
+			
+			drawBoundingBox(g2);
 			
 		}
 		
@@ -212,12 +213,11 @@ public class DemoXORPanel extends JPanel {
 	}
 	
 	public void drawSquare(int x, int y, Graphics2D g) {
-		g.drawRect(x - 5, y - 5,
-				10, 10);	
+		g.drawRect(x - 5, y - 5, 10, 10);	
 	}
 	
 	public void drawBoundingBox(Graphics2D g) {
-		
+		if(!linhaPresa) {
 		int minX = points.get(0).getX();
 		int minY = points.get(0).getY();
 		int maxX = points.get(0).getX();
@@ -235,6 +235,7 @@ public class DemoXORPanel extends JPanel {
 		}
 		
 		g.drawRect(minX, minY, maxX-minX, maxY-minY);
+		}
 		
 	}
 
