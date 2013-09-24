@@ -1,7 +1,7 @@
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -24,7 +24,8 @@ public class DemoXORFrame extends JFrame {
 		setJMenuBar(barra);
 		
 		painel = new DemoXORPanel();
-		painel.setBackground(Color.gray);
+		//painel.setBackground(Color.DARK_GRAY);
+		painel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 		setContentPane(painel);
 	}
 	
@@ -58,11 +59,10 @@ public class DemoXORFrame extends JFrame {
 	
 	private JMenu criarMenuMenu1()
 	{
-		JMenu menu = new JMenu("Menu 1");
-		menu.add(criarItemMenuMenu1("Item 1"));
-		menu.add(criarItemMenuMenu1("Item 2"));
-		menu.add(criarItemMenuMenu1("Item 3"));
-		menu.add(criarItemMenuMenu1("Item 4"));
+		JMenu menu = new JMenu("Pontos");
+		menu.add(criarItemMenuMenu1("4"));
+		menu.add(criarItemMenuMenu1("7"));
+		menu.add(criarItemMenuMenu1("10"));
 		return menu;
 	}
 	
@@ -74,7 +74,20 @@ public class DemoXORFrame extends JFrame {
 		{
 			public void actionPerformed(ActionEvent event)
 			{
-				System.out.println("Item escolhido!");
+				
+				if(event.getActionCommand().equals("4")) {
+					System.out.println("4 pontos escolhidos."); 
+					painel.setPointNumber(4);
+				}
+				if(event.getActionCommand().equals("7")) {
+					System.out.println("7 pontos escolhidos.");
+					painel.setPointNumber(7);
+				}
+				if(event.getActionCommand().equals("10")){
+					System.out.println("10 pontos escolhidos.");
+					painel.setPointNumber(10);
+				}
+					
 			}
 		}
 		
