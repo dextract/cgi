@@ -18,8 +18,8 @@ public class DemoXORPanel extends JPanel {
     
     public DemoXORPanel() {
 
-    	// Fundo de cor cinzenta
-    	setBackground(Color.gray);
+        // Fundo de cor cinzenta
+        setBackground(Color.blue);
                 
         MouseListener ml = new MouseAdapter() {
                         
@@ -27,29 +27,31 @@ public class DemoXORPanel extends JPanel {
                 Graphics2D g = (Graphics2D) getGraphics();
                 
                 exited = false;
-                if( (linhaPresa) || (existeLinha && grabbedPoint !=null) )  {
-                    g.setColor(Color.yellow);
-                    g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
-                    g.setColor(Color.black);
+                
+                if(linhaPresa)
+                {
+                	   g.setColor(Color.yellow);
+                       g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
+                       g.setColor(g.getBackground());
                 }
-                    
             }
                         
             public void mouseExited(MouseEvent e) {
                 Graphics2D g = (Graphics2D) getGraphics();
                 
                 exited = true;
-                if(existeLinha && grabbedPoint !=null) {
-                    g.setColor(Color.yellow);
-                    g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
-                    g.setColor(Color.black);
-                }
+                
+                if(linhaPresa) {
+                	   g.setColor(Color.yellow);
+                       g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
+                       g.setColor(g.getBackground());
+                }           
                     
             }
             
-	        public void mouseReleased(MouseEvent e) {
-	        	grabbedPoint = null;
-	        }
+                public void mouseReleased(MouseEvent e) {
+                        grabbedPoint = null;
+                }
       
             public void mousePressed(MouseEvent e) {
 
@@ -65,12 +67,12 @@ public class DemoXORPanel extends JPanel {
                 //clicar numa vizinhanÃ§a de um ponto
                 for(Point p: points)
                     if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5)
-                    	grabbedPoint = p;
+                        grabbedPoint = p;
                 
                 Graphics2D g = (Graphics2D) getGraphics();
                 
                 
-                if(linhaPresa && nPoints==1) {  // Estamos a acabar uma linha...
+                if(linhaPresa && points.size()==nPoints-1) {  // Estamos a acabar uma linha...
                 // Desenhar a linha nova (definitiva)
                 
                     g.setPaintMode();
@@ -79,23 +81,20 @@ public class DemoXORPanel extends JPanel {
                     g.drawLine(xPosInicial, yPosInicial, xPos, yPos);
                     g.setColor(Color.black);
                     
-            
                     linhaPresa = false;
                     points.add(new Point(xPos, yPos, true));
                     drawSquare(xPos, yPos, g);
                     if(boundingBox)
-                    	drawBoundingBox(g);
+                        drawBoundingBox(g);
                 
                 }
-                else if(nPoints > 1){   // Estamos a iniciar uma linha
+                else if(points.size()<nPoints-1){   // Estamos a iniciar uma linha
                                                         
                     linhaPresa = true;
                     xPosInicial = xPosAnterior = xPos;
                     yPosInicial = yPosAnterior = yPos;
                     drawSquare(xPos, yPos, g);
                     points.add(new Point(xPosInicial, yPosInicial, false));
-                    nPoints--;
-
                 }
             }                       
         
@@ -105,7 +104,7 @@ public class DemoXORPanel extends JPanel {
                 
                 
             public void mouseDragged(MouseEvent e) {
-                if(nPoints > 1) return; //ainda nÃ£o se finalizou a linha por isso nÃ£o deve poder arrastar pontos
+                if(points.size() < nPoints) return; //ainda nÃ£o se finalizou a linha por isso nÃ£o deve poder arrastar pontos
                 
                 // Obter a posicao actual do cursor
                 int x = e.getX();
@@ -122,15 +121,33 @@ public class DemoXORPanel extends JPanel {
             }
             
             public void mouseMoved(MouseEvent e) {
-                    
-                if(!linhaPresa) return;         // Nao estamos a meio da especificacao duma linha!
-                
-                existeLinha = true;
-                
+                   
                 // Obter a posicao actual do cursor
                 int xPos = e.getX();
                 int yPos = e.getY();
-
+            	
+            	if(points.size() == nPoints) //linha já terminada
+            		
+                    if(boundingBox) {
+    	                
+     	               if(Math.abs(xPos-boxXmin)<=5 && Math.abs(yPos-boxYmin)<=5 ||
+     	            	  Math.abs(xPos-boxXmax)<=5 && Math.abs(yPos-boxYmax)<=5 ||
+     	            	  Math.abs(xPos-boxXmax)<=5 && Math.abs(yPos-boxYmin)<=5 ||
+     	            	  Math.abs(xPos-boxXmin)<=5 && Math.abs(yPos-boxYmax)<=5)
+     	            	   System.out.println("rotate");
+                       else if(Math.abs(xPos-boxXmin)<=5 || Math.abs(yPos-boxYmin)<=5 || Math.abs(xPos-boxXmax)<=5 || Math.abs(yPos-boxYmax)<=5)
+     	            	   System.out.println("resize");
+     	            	   
+     	               else if (Math.abs(xPos-boxXmax)<= boxXmax - boxXmin && Math.abs(yPos-boxYmax)<= boxYmax - boxYmin)
+     	            	   System.out.println("move");
+                     }
+            	
+            	
+                if(!linhaPresa) return;         // Nao estamos a meio da especificacao duma linha!
+               
+                existeLinha = true;
+    
+                
                 // Colocar em modo de desenho XOR
                 Graphics2D g = (Graphics2D) getGraphics();
                 g.setXORMode(getBackground());
@@ -176,11 +193,11 @@ public class DemoXORPanel extends JPanel {
                     
                     drawSquare(fp.getX(), fp.getY(), g2);
                     if(i==points.size()-2)
-                    	drawSquare(sp.getX(), sp.getY(), g2);
+                        drawSquare(sp.getX(), sp.getY(), g2);
                         
                 }
                 if(boundingBox)   
-                	drawBoundingBox(g2);
+                        drawBoundingBox(g2);
                     
             }
             
@@ -195,7 +212,6 @@ public class DemoXORPanel extends JPanel {
             // Mudar o estado da aplicacao
             existeLinha = false;
             linhaPresa = false;
-            nPoints = 4;
             points.clear();
             // Force-se a actualizacao do componente (acabarah por invocar o paintComponent)
             repaint();
@@ -223,33 +239,40 @@ public class DemoXORPanel extends JPanel {
                             minY = p.getY();
             }
             
+            boxXmin = minX;
+            boxXmax = maxX;
+            boxYmin = minY;
+            boxYmax = maxY;
+            
             g.drawRect(minX, minY, maxX-minX, maxY-minY);
             }
             
     }
     
-	public void setPointNumber(int n) {
-		nPoints = n;
-	}
-	
-	public void changeOption(int n) {
+        public void setPointNumber(int n) {
+        	
+        		nPoints = n;
+               	limparDesenho();
+        }
+        
+        public void changeOption(int n) {
         Graphics2D g = (Graphics2D) getGraphics();
-		// 1 - bounding box
-		// 
-		if(n==1)
-			boundingBox = (boundingBox) ? false : true;
-		
-		if(boundingBox)
-			drawBoundingBox(g);
-		else {
-			g.setXORMode(getBackground());
-			drawBoundingBox(g);
-			g.setPaintMode();
-		}
-		
-	}
+                // 1 - bounding box
+                // 
+                if(n==1)
+                        boundingBox = (boundingBox) ? false : true;
+                
+                if(boundingBox)
+                        drawBoundingBox(g);
+                else {
+                        g.setXORMode(getBackground());
+                        drawBoundingBox(g);
+                        g.setPaintMode();
+                }
+                
+        }
 
-	private boolean boundingBox = false;
+        private boolean boundingBox = false;
     private boolean existeLinha = false;
     private boolean linhaPresa = false;
     private boolean exited = false;
@@ -258,10 +281,11 @@ public class DemoXORPanel extends JPanel {
     private int xPosInicial, yPosInicial;
     private int xPosAnterior, yPosAnterior;
     private Point grabbedPoint = null; 
+    private int boxXmin, boxXmax, boxYmin, boxYmax;
     
-    private int[][] bezierMatrix = {	{-1,3,-3,1},
-    									{3,-6,3,0},
-    									{-3,3,0,0},
-    									{1,0,0,0}	};
+    private int[][] bezierMatrix = {    {-1,3,-3,1},
+                                                                        {3,-6,3,0},
+                                                                        {-3,3,0,0},
+                                                                        {1,0,0,0}       };
 
 }
