@@ -18,7 +18,7 @@ public class DemoXORPanel extends JPanel {
     
     public DemoXORPanel() {
 
-        // Fundo de cor cinzenta
+        // Fundo de cor azul
         setBackground(Color.blue);
                 
         MouseListener ml = new MouseAdapter() {
@@ -63,6 +63,14 @@ public class DemoXORPanel extends JPanel {
                 int xPos = e.getX();
                 int yPos = e.getY();
                 
+                
+                if(move == true)
+                	System.out.println("moving box");
+                else if(resize == true)
+                	System.out.println("resizing box");
+                else if(rotate == true)
+                	System.out.println("rotating box");
+                	
 
                 //clicar numa vizinhanÃ§a de um ponto
                 for(Point p: points)
@@ -133,13 +141,27 @@ public class DemoXORPanel extends JPanel {
      	               if(Math.abs(xPos-boxXmin)<=5 && Math.abs(yPos-boxYmin)<=5 ||
      	            	  Math.abs(xPos-boxXmax)<=5 && Math.abs(yPos-boxYmax)<=5 ||
      	            	  Math.abs(xPos-boxXmax)<=5 && Math.abs(yPos-boxYmin)<=5 ||
-     	            	  Math.abs(xPos-boxXmin)<=5 && Math.abs(yPos-boxYmax)<=5)
-     	            	   System.out.println("rotate");
-                       else if(Math.abs(xPos-boxXmin)<=5 || Math.abs(yPos-boxYmin)<=5 || Math.abs(xPos-boxXmax)<=5 || Math.abs(yPos-boxYmax)<=5)
-     	            	   System.out.println("resize");
-     	            	   
+     	            	  Math.abs(xPos-boxXmin)<=5 && Math.abs(yPos-boxYmax)<=5) 
+     	               {
+     	            	   rotate = true;
+     	            	   move = false;
+     	            	   resize = false;
+     	               }	            	  
+                       else if(Math.abs(xPos-boxXmin)<=5 ||
+                    		   Math.abs(yPos-boxYmin)<=5 || 
+                    		   Math.abs(xPos-boxXmax)<=5 ||
+                    		   Math.abs(yPos-boxYmax)<=5)
+       	               {
+     	            	   rotate = false;
+     	            	   move = false;
+     	            	   resize = true;
+     	               }   
      	               else if (Math.abs(xPos-boxXmax)<= boxXmax - boxXmin && Math.abs(yPos-boxYmax)<= boxYmax - boxYmin)
-     	            	   System.out.println("move");
+       	               {
+     	            	   rotate = false;
+     	            	   move = true;
+     	            	   resize = false;
+     	               }
                      }
             	
             	
@@ -272,7 +294,7 @@ public class DemoXORPanel extends JPanel {
                 
         }
 
-        private boolean boundingBox = false;
+    private boolean boundingBox = false;
     private boolean existeLinha = false;
     private boolean linhaPresa = false;
     private boolean exited = false;
@@ -282,6 +304,9 @@ public class DemoXORPanel extends JPanel {
     private int xPosAnterior, yPosAnterior;
     private Point grabbedPoint = null; 
     private int boxXmin, boxXmax, boxYmin, boxYmax;
+    private boolean rotate = false;
+    private boolean resize = false;
+    private boolean move = false;
     
     private int[][] bezierMatrix = {    {-1,3,-3,1},
                                                                         {3,-6,3,0},
