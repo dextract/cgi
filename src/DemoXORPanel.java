@@ -18,8 +18,8 @@ public class DemoXORPanel extends JPanel {
     private static final long serialVersionUID = 1L;
     
     public DemoXORPanel() {
-    	// Fundo de cor cinzenta
-    	setBackground(Color.blue);
+        // Fundo de cor cinzenta
+        setBackground(Color.blue);
                 
         MouseListener ml = new MouseAdapter() {
                         
@@ -41,20 +41,20 @@ public class DemoXORPanel extends JPanel {
                 exited = true;
                 
                 if(linhaPresa) {
-                	g.setColor(Color.yellow);
-                	g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
-                	g.setColor(g.getBackground());
+                        g.setColor(Color.yellow);
+                        g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
+                        g.setColor(g.getBackground());
                 }           
             }
             
-	        public void mouseReleased(MouseEvent e) {
-	        	if(grabbedPoint!=null) {
-	        		grabbedPoint = null;
-	        		calculateCoeffs(points);
-	        	}
-	        	
-	        	
-	        }
+            public void mouseReleased(MouseEvent e) {
+                    if(grabbedPoint!=null) {
+                            grabbedPoint = null;
+                          //  calculateCoeffs(points);
+                    }
+                    
+                    
+            }
       
             public void mousePressed(MouseEvent e) {
 
@@ -97,7 +97,7 @@ public class DemoXORPanel extends JPanel {
                     drawSquare(xPos, yPos, g);
                     if(boundingBox)
                         drawBoundingBox(g);
-                    calculateCoeffs(points);
+                    calculateCoeffs(points, g);
                 
                 }
                 else if(points.size()<nPoints-1){   // Estamos a iniciar uma linha
@@ -115,7 +115,7 @@ public class DemoXORPanel extends JPanel {
         MouseMotionListener mml = new MouseMotionAdapter() {
                 
             public void mouseDragged(MouseEvent e) {
-            	if(points.size() < nPoints) return; //ainda nÃ£o se finalizou a linha por isso nÃ£o deve poder arrastar pontos
+                if(points.size() < nPoints) return; //ainda nÃ£o se finalizou a linha por isso nÃ£o deve poder arrastar pontos
                   
                 // Obter a posicao actual do cursor
                 int x = e.getX();
@@ -127,7 +127,7 @@ public class DemoXORPanel extends JPanel {
                         grabbedPoint.setNewY(y);
                     }
                     repaint();
-                    calculateCoeffs(points);
+                   // calculateCoeffs(points);
                     
                 }
                     
@@ -217,10 +217,12 @@ public class DemoXORPanel extends JPanel {
                 
                 drawSquare(fp.getX(), fp.getY(), g2);
                 if(i==points.size()-2)
-                	drawSquare(sp.getX(), sp.getY(), g2);        
+                        drawSquare(sp.getX(), sp.getY(), g2);        
             }
             if(boundingBox)   
-            	drawBoundingBox(g2);    
+                drawBoundingBox(g2);
+            calculateCoeffs(points, g2);
+            
         }
 
     }
@@ -244,12 +246,12 @@ public class DemoXORPanel extends JPanel {
     
     public void drawBoundingBox(Graphics2D g) {
         if(!linhaPresa) {
-	        int minX = points.get(0).getX();
-	        int minY = points.get(0).getY();
-	        int maxX = points.get(0).getX();
-	        int maxY = points.get(0).getY();
-	        
-	        for(Point p:points) {
+                int minX = points.get(0).getX();
+                int minY = points.get(0).getY();
+                int maxX = points.get(0).getX();
+                int maxY = points.get(0).getY();
+                
+                for(Point p:points) {
                 if(p.getX()>maxX)
                         maxX = p.getX();
                 if(p.getY()>maxY)
@@ -258,106 +260,105 @@ public class DemoXORPanel extends JPanel {
                         minX = p.getX();
                 if(p.getY()<minY)
                         minY = p.getY();
-	        }
-	        
-	        boxXmin = minX;
-	        boxXmax = maxX;
-	        boxYmin = minY;
-	        boxYmax = maxY;
-	        
-	        g.drawRect(minX, minY, maxX-minX, maxY-minY);
+                }
+                
+                boxXmin = minX;
+                boxXmax = maxX;
+                boxYmin = minY;
+                boxYmax = maxY;
+                
+                g.drawRect(minX, minY, maxX-minX, maxY-minY);
         }
     }
     
     public void setPointNumber(int n) {
         
         nPoints = n;
-limparDesenho();
-}
-	
-	public void changeOption(int n) {
-        Graphics2D g = (Graphics2D) getGraphics();
-		// 1 - bounding box
-		// 
-		if(n==1)
-			boundingBox = (boundingBox) ? false : true;
-		
-		if(boundingBox)
-			drawBoundingBox(g);
-		else {
-			g.setXORMode(getBackground());
-			drawBoundingBox(g);
-			g.setPaintMode();
-		}
-		
-	}
+        limparDesenho();
+    }
+        
+    public void changeOption(int n) {
+    	Graphics2D g = (Graphics2D) getGraphics();
+        // 1 - bounding box
+        // 
+        if(n==1)
+                boundingBox = (boundingBox) ? false : true;
+        
+        if(boundingBox)
+                drawBoundingBox(g);
+        else {
+                g.setXORMode(getBackground());
+                drawBoundingBox(g);
+                g.setPaintMode();
+        }
+            
+    }
 
-	public void calculateCoeffs(List<Point> points) {
-		
-		int[][] bezierM = 
-			{	{-1,3,-3,1},
-				{3,-6,3,0},
-				{-3,3,0,0},
-				{1,0,0,0}	};
-		
-		int[] x = new int[4];
-		int[] y = new int[4];
-		
-		int[] cx = new int[4];
-		int[] cy = new int[4];
+    public void calculateCoeffs(List<Point> points, Graphics2D g) {
+            
+        int[][] bezierM = 
+                {       {-1,3,-3,1},
+                        {3,-6,3,0},
+                        {-3,3,0,0},
+                        {1,0,0,0}       };
+        
+        int[] x = new int[4];
+        int[] y = new int[4];
+        
+        int[] cx = new int[4];
+        int[] cy = new int[4];
 
-		int i = 0;
+        int i = 0;
 
-		for(Point p: points) {
-			x[i]=p.getX();
-			y[i]=p.getY();
-			i++;
-		}
-		
-		for(i=0;i<x.length;i++) {
-			cx[i]=bezierM[i][0]*x[0]+bezierM[i][1]*x[1]+bezierM[i][2]*x[2]+bezierM[i][3]*x[3];
-			cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
-		}
-		
-		/*System.out.println();
-		for(i=0;i<cx.length;i++) 
-			System.out.print(cx[i]+" ");
-		System.out.println();
-		for(i=0;i<cy.length;i++) 
-			System.out.print(cy[i]+" ");*/
+        for(Point p: points) {
+            x[i]=p.getX();
+            y[i]=p.getY();
+            i++;
+        }
+        
+        for(i=0;i<x.length;i++) {
+            cx[i]=bezierM[i][0]*x[0]+bezierM[i][1]*x[1]+bezierM[i][2]*x[2]+bezierM[i][3]*x[3];
+            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
+        }
+        
+        /*System.out.println();
+        for(i=0;i<cx.length;i++) 
+                System.out.print(cx[i]+" ");
+        System.out.println();
+        for(i=0;i<cy.length;i++) 
+                System.out.print(cy[i]+" ");*/
 
-		drawCurve(cx, cy, 100);
-		
-	}         
-	
-	/**
-	 * @param cx Coefficients for x(t): Cx=M*Gx
-	 * @param cy Coefficients for y(t): Cy=M*Gy
-	 * @param n Number of steps
-	 */
-	public void drawCurve(int[] cx, int[] cy, int n) {
-		Graphics2D g = (Graphics2D) getGraphics();
-		g.setStroke(new BasicStroke(2));
-		double t = 0;
-		double delta = 1.0/n;
-		double t2, t3;
-		int x, y;
-		int prevx = points.get(0).getX();
-		int prevy = points.get(0).getY();
-		
-		for(int i=0;i<n;i++) {	
-			t+=delta;
-			t2=t*t;
-			t3=t2*t;
-			x=(int) (cx[0]*t3+cx[1]*t2+cx[2]*t+cx[3]);
-			y=(int) (cy[0]*t3+cy[1]*t2+cy[2]*t+cy[3]);
-			g.drawLine(prevx, prevy, x, y);
-			prevx=x;
-			prevy=y;
-		}
-	}
-	
-	private boolean boundingBox = false;
+        drawCurve(cx, cy, 50, g);
+            
+    }         
+        
+    /**
+     * @param cx Coefficients for x(t): Cx=M*Gx
+     * @param cy Coefficients for y(t): Cy=M*Gy
+     * @param n Number of steps
+     */
+    public void drawCurve(int[] cx, int[] cy, int n, Graphics2D g) {
+        g.setStroke(new BasicStroke(2));
+        double t = 0;
+        double delta = 1.0/n;
+        double t2, t3;
+        int x, y;
+        int prevx = points.get(0).getX();
+        int prevy = points.get(0).getY();
+        
+        for(int i=0;i<n;i++) {  
+            t+=delta;
+            t2=t*t;
+            t3=t2*t;
+            x=(int) (cx[0]*t3+cx[1]*t2+cx[2]*t+cx[3]);
+            y=(int) (cy[0]*t3+cy[1]*t2+cy[2]*t+cy[3]);
+            g.drawLine(prevx, prevy, x, y);
+            prevx=x;
+            prevy=y;
+        }
+    }
+    
+    private boolean boundingBox = false;
     private boolean existeLinha = false;
     private boolean linhaPresa = false;
     private boolean exited = false;
