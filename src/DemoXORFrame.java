@@ -2,6 +2,8 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -20,6 +22,7 @@ public class DemoXORFrame extends JFrame {
 		JMenuBar barra = new JMenuBar();
 		barra.add(criarMenuFicheiro());
 		barra.add(criarMenuMenu1());
+		barra.add(criarMenuOpcoes());
 		barra.add(criarMenuAjuda());
 		setJMenuBar(barra);
 		
@@ -29,12 +32,36 @@ public class DemoXORFrame extends JFrame {
 		setContentPane(painel);
 	}
 	
+	private JMenu criarMenuOpcoes() {
+		JMenu menu = new JMenu("Opçoes");
+		menu.add(criarItemMenuOpcoes("Bounding Box"));
+		return menu;
+	}
+
 	private JMenu criarMenuFicheiro() {
 		JMenu menu = new JMenu("File");
 		menu.add(criarItemMenuFicheiro("New"));
 		menu.add(new JSeparator());
 		menu.add(criarItemMenuFicheiro("Exit"));
 		return menu;
+	}
+	
+	private JMenuItem criarItemMenuOpcoes(String texto) {
+		final JCheckBoxMenuItem item = new JCheckBoxMenuItem(texto);
+
+		class ListenerItemMenu implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e) {
+				if(e.getActionCommand().equals("Bounding Box") && item.isSelected())
+					item.setSelected(true);
+				else if(e.getActionCommand().equals("Bounding Box") && !item.isSelected())
+					item.setSelected(false);
+				painel.changeOption(1);
+			}	
+		}
+		
+		item.addActionListener(new ListenerItemMenu());
+		return item;	
 	}
 	
 	private JMenuItem criarItemMenuFicheiro(String texto)
