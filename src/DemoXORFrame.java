@@ -32,6 +32,7 @@ public class DemoXORFrame extends JFrame {
 		setContentPane(painel);
 	}
 	
+	
 	private JMenu criarMenuOpcoes() {
 		JMenu menu = new JMenu("Opçoes");
 		menu.add(criarItemMenuOpcoes("Bounding Box"));

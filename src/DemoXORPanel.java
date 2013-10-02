@@ -1,5 +1,6 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
@@ -49,10 +50,10 @@ public class DemoXORPanel extends JPanel {
             
             public void mouseReleased(MouseEvent e) {
                     if(grabbedPoint!=null) {
-                            grabbedPoint = null;
-                          //  calculateCoeffs(points);
+                    	grabbedPoint = null;
+                    	
                     }
-                    
+                    setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                     
             }
       
@@ -60,25 +61,24 @@ public class DemoXORPanel extends JPanel {
 
                 if(e.getButton() != MouseEvent.BUTTON1) return;
                 if(e.getClickCount() != 1) return;
-                
-
+  
                 // Obter as coordenadas actuais da posicao do rato
                 int xPos = e.getX();
                 int yPos = e.getY();
                 
+                //clicar numa vizinhanÃ§a de um ponto
+                for(Point p: points)
+                    if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5)
+                        grabbedPoint = p;
                 
-                if(move == true)
-                        System.out.println("moving box");
+                if((grabbedPoint==null) && (move == true))
+                	setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                 else if(resize == true)
                         System.out.println("resizing box");
                 else if(rotate == true)
                         System.out.println("rotating box");
                         
 
-                //clicar numa vizinhanÃ§a de um ponto
-                for(Point p: points)
-                    if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5)
-                        grabbedPoint = p;
                 
                 Graphics2D g = (Graphics2D) getGraphics();
                 
@@ -116,7 +116,7 @@ public class DemoXORPanel extends JPanel {
                 
             public void mouseDragged(MouseEvent e) {
                 if(points.size() < nPoints) return; //ainda nÃ£o se finalizou a linha por isso nÃ£o deve poder arrastar pontos
-                  
+                 
                 // Obter a posicao actual do cursor
                 int x = e.getX();
                 int y = e.getY();
@@ -142,33 +142,74 @@ public class DemoXORPanel extends JPanel {
                 if(points.size() == nPoints) //linha já terminada
                         
                     if(boundingBox) {
-                        
-                       if(Math.abs(xPos-boxXmin)<=5 && Math.abs(yPos-boxYmin)<=5 ||
-                          Math.abs(xPos-boxXmax)<=5 && Math.abs(yPos-boxYmax)<=5 ||
-                          Math.abs(xPos-boxXmax)<=5 && Math.abs(yPos-boxYmin)<=5 ||
-                          Math.abs(xPos-boxXmin)<=5 && Math.abs(yPos-boxYmax)<=5) 
-                       {
-                           rotate = true;
-                           move = false;
-                           resize = false;
-                       }                          
-                       else if(Math.abs(xPos-boxXmin)<=5 ||
-                                   Math.abs(yPos-boxYmin)<=5 || 
-                                   Math.abs(xPos-boxXmax)<=5 ||
-                                   Math.abs(yPos-boxYmax)<=5)
-                       {
-                           rotate = false;
-                           move = false;
-                           resize = true;
-                       }   
-                       else if (Math.abs(xPos-boxXmax)<= boxXmax - boxXmin && Math.abs(yPos-boxYmax)<= boxYmax - boxYmin)
-                       {
-                           rotate = false;
-                           move = true;
-                           resize = false;
-                       }
-                     }
-                
+                    	// Move & Resize
+                    	if(	(boxXmin<=xPos && xPos<=boxXmax) &&
+                     		(boxYmin<=yPos && yPos<=boxYmax) ) {
+                    		
+                    		rotate = false;
+                            move = false;
+                            resize = true;
+                        	/*
+                        	 * 0-N; 1-NE; 2-E; 3-SE; 4-S; 5-SW; 6-W; 7-NW
+                        	 * 
+                        	 */
+                            if( (yPos-boxYmin<=5) && (boxXmax-xPos<=5) )
+                        		resizeSide = 1;
+                            else if( (boxYmax-yPos<=5) && (boxXmax-xPos<=5) )
+                        		resizeSide = 3;
+                            else if( (boxYmax-yPos<=5) && (xPos-boxXmin<=5) )
+                        		resizeSide = 5;
+                            else if( (yPos-boxYmin<=5) && (xPos-boxXmin<=5) )
+                        		resizeSide = 7;
+                            else if(yPos-boxYmin<=5)
+                                resizeSide = 0;
+                            else if(boxXmax-xPos<=5)
+                        		resizeSide = 2;
+                            else if(boxYmax-yPos<=5)
+                        		resizeSide = 4;
+                            else if(xPos-boxXmin<=5)
+                                resizeSide = 6;
+                        	else {
+	                            rotate = false;
+	                            move = true;
+	                            resize = false;
+                        	}
+                        }
+                    	// Rotate
+                    	else {
+                    		rotate = true;
+	                     	move = false;
+	                     	resize = false;
+	                     	
+	                    	/*
+                        	 * 0-N; 1-NE; 2-E; 3-SE; 4-S; 5-SW; 6-W; 7-NW
+                        	 * 
+                        	 */
+                            if( (boxYmin-yPos<=5) && (xPos-boxXmax<=5) )
+                            	rotateSide = 1;
+                            else if( (yPos-boxYmax<=5) && (xPos-boxXmax<=5) )
+                            	rotateSide = 3;
+                            else if( (yPos-boxYmax<=5) && (boxXmin-xPos<=5) )
+                            	rotateSide = 5;
+                            else if( (boxYmin-yPos<=5) && (boxXmin-xPos<=5) )
+                            	rotateSide = 7;
+                            else if(boxYmin-yPos<=5)
+                            	rotateSide = 0;
+                            else if(xPos-boxXmax<=5)
+                            	rotateSide = 2;
+                            else if(yPos-boxYmax<=5)
+                            	rotateSide = 4;
+                            else if(boxXmin-xPos<=5)
+                            	rotateSide = 6;
+                            else {
+                            	rotate = false;
+    	                     	move = false;
+    	                     	resize = false;
+                            }
+                    		
+                    	}
+                    	
+                    }
                 
                 if(!linhaPresa) return;         // Nao estamos a meio da especificacao duma linha!
                
@@ -328,7 +369,7 @@ public class DemoXORPanel extends JPanel {
         for(i=0;i<cy.length;i++) 
                 System.out.print(cy[i]+" ");*/
 
-        drawCurve(cx, cy, 50, g);
+        drawCurve(cx, cy, 1000, g);
             
     }         
         
@@ -362,6 +403,8 @@ public class DemoXORPanel extends JPanel {
     private boolean existeLinha = false;
     private boolean linhaPresa = false;
     private boolean exited = false;
+    private int resizeSide = 0;
+    private int rotateSide = 0;
     private int nPoints = 4;
     private List<Point> points = new ArrayList<Point>();
     private int xPosInicial, yPosInicial;
