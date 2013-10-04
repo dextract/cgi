@@ -144,6 +144,66 @@ public class DemoXORPanel extends JPanel {
             		moveStartPoint.setNewY(y);
                 	
                 }
+                
+                else if(resize) {
+                	switch(resizeSide) {
+                		case 0: { // Resize cima
+                			// Factor multiplicante com base no ponto com o maior y
+		                	double multFactor = boxYmax-e.getY();
+		                	multFactor /= boxYmax-moveStartPoint.getY();
+		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+		                	// voltem aos sitios correctos
+		                	int sub = (int) (boxYmax*multFactor-boxYmax);
+	                		for(Point p: points) {
+	                    		p.setNewY((int)(p.getY()*multFactor-sub));	
+	                    		repaint();
+	                		}
+		                	break;
+                		}
+                		case 2: { // Resize direita
+                			// Factor multiplicante com base no ponto com o menor x
+		                	double multFactor = e.getX()-boxXmin;
+		                	multFactor /= moveStartPoint.getX()-boxXmin;
+		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+		                	// voltem aos sitios correctos
+		                	int sub = (int) (boxXmin*multFactor-boxXmin);
+	                		for(Point p: points) {
+	                    		p.setNewX((int)(p.getX()*multFactor-sub));	
+	                    		repaint();
+	                		}
+		                	break;
+                		}
+                		case 4: { // Resize baixo
+                			// Factor multiplicante com base no ponto com o menor y
+		                	double multFactor = e.getY()-boxYmin;
+		                	multFactor /= moveStartPoint.getY()-boxYmin;
+		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+		                	// voltem aos sitios correctos
+		                	int sub = (int) (boxYmin*multFactor-boxYmin);
+	                		for(Point p: points) {
+	                    		p.setNewY((int)(p.getY()*multFactor-sub));	
+	                    		repaint();
+	                		}
+		                	break;
+                		}
+                		case 6: { // Resize esquerda
+                			// Factor multiplicante com base no ponto com o maior x
+		                	double multFactor = boxXmax-e.getX();
+		                	multFactor /= boxXmax-moveStartPoint.getX();
+		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+		                	// voltem aos sitios correctos
+		                	int sub = (int) (boxXmax*multFactor-boxXmax);
+	                		for(Point p: points) {
+	                    		p.setNewX((int)(p.getX()*multFactor-sub));	
+	                    		repaint();
+	                		}
+		                	break;
+                		}
+                		default: break;
+                	}
+                	moveStartPoint.setNewX(x);
+                	moveStartPoint.setNewY(y);
+                }
                     
             }
             
@@ -163,6 +223,7 @@ public class DemoXORPanel extends JPanel {
                     		rotate = false;
                             move = false;
                             resize = true;
+                            moveStartPoint=new Point(xPos,yPos,false);
                         	/*
                         	 * 0-N; 1-NE; 2-E; 3-SE; 4-S; 5-SW; 6-W; 7-NW
                         	 * 
