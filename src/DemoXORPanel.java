@@ -132,25 +132,18 @@ public class DemoXORPanel extends JPanel {
                     
                 }
                 
-                 else if(move) {
-                	
-                	int cX = (boxXmax + boxXmin) / 2; //coords do centro da box
-                	int cY = (boxYmax + boxYmin) / 2;
-                	 
-                	int difX;
-                	int difY;
-                	
+                else if(move) {
+ 
                 	for(Point p: points) {
-                		
-                		difX = cX - p.getX();
-                		difY = cY - p.getY();            	
-                		
-                		p.setNewX(e.getX() - difX);
-                		p.setNewY(e.getY() - difY);
-                		
+                		p.setNewX(p.getX()+(x-moveStartPoint.getX()));
+                		p.setNewY(p.getY()+(y-moveStartPoint.getY()));
                 		repaint();
                 	}
-                 }
+                	
+                	moveStartPoint.setNewX(x);
+            		moveStartPoint.setNewY(y);
+                	
+                }
                     
             }
             
@@ -194,6 +187,7 @@ public class DemoXORPanel extends JPanel {
 	                            rotate = false;
 	                            move = true;
 	                            resize = false;
+	                            moveStartPoint=new Point(xPos,yPos,false);
                         	}
                         }
                     	// Rotate
@@ -430,6 +424,7 @@ public class DemoXORPanel extends JPanel {
     private List<Point> points = new ArrayList<Point>();
     private int xPosInicial, yPosInicial;
     private int xPosAnterior, yPosAnterior;
+    private Point moveStartPoint = null;
     private Point grabbedPoint = null;
     private int boxXmin, boxXmax, boxYmin, boxYmax;
     private boolean rotate = false;
