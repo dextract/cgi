@@ -71,8 +71,9 @@ public class DemoXORPanel extends JPanel {
                     if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5)
                         grabbedPoint = p;
                 
-                if((grabbedPoint==null) && (move == true))
+                if((grabbedPoint==null) && (move == true)) {
                 	setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                }
                 else if(resize == true)
                         System.out.println("resizing box");
                 else if(rotate == true)
@@ -130,6 +131,26 @@ public class DemoXORPanel extends JPanel {
                    // calculateCoeffs(points);
                     
                 }
+                
+                 else if(move) {
+                	
+                	int cX = (boxXmax + boxXmin) / 2; //coords do centro da box
+                	int cY = (boxYmax + boxYmin) / 2;
+                	 
+                	int difX;
+                	int difY;
+                	
+                	for(Point p: points) {
+                		
+                		difX = cX - p.getX();
+                		difY = cY - p.getY();            	
+                		
+                		p.setNewX(e.getX() - difX);
+                		p.setNewY(e.getY() - difY);
+                		
+                		repaint();
+                	}
+                 }
                     
             }
             
