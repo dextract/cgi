@@ -77,9 +77,8 @@ public class DemoXORPanel extends JPanel {
                 else if(resize == true)
                         System.out.println("resizing box");
                 else if(rotate == true)
-                        System.out.println("rotating box");
+                	    System.out.println("rotating box");
                         
-
                 
                 Graphics2D g = (Graphics2D) getGraphics();
                 
@@ -143,8 +142,7 @@ public class DemoXORPanel extends JPanel {
                 	moveStartPoint.setNewX(x);
             		moveStartPoint.setNewY(y);
                 	
-                }
-                
+                }           
                 else if(resize) {
                 	switch(resizeSide) {
                 		case 0: { // Resize cima
@@ -203,8 +201,29 @@ public class DemoXORPanel extends JPanel {
                 	}
                 	moveStartPoint.setNewX(x);
                 	moveStartPoint.setNewY(y);
+                } 
+                else if (rotate) {
+                	double c = Math.sqrt(Math.pow(moveStartPoint.getX() - cX, 2) + Math.pow(moveStartPoint.getY() - cY, 2));
+                	double alpha = (Math.acos((moveStartPoint.getY() - cY) / c));
+                	double beta = (Math.acos((e.getY() - cY) / c));
+                	          	
+                  	//System.out.println(beta-alpha);
+                  	
+      
+                  	/*
+                  	 * p'x = cos(theta) * (px-ox) - sin(theta) * (py-oy) + ox
+					 * p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+                  	 */
+                	for(Point p: points) {
+                		p.setNewX((int) ((p.getX() - cX) * Math.cos(beta-alpha) - (p.getY()-cY) * Math.sin(beta-alpha) + cX));
+                		p.setNewY((int) ((p.getX() - cX) * Math.sin(beta-alpha) + (p.getY()-cY) * Math.cos(beta-alpha) + cY));
+               
+                		repaint();
+                	}
+                	
+                	moveStartPoint.setNewX(x);
+            		moveStartPoint.setNewY(y);
                 }
-                    
             }
             
             public void mouseMoved(MouseEvent e) {
@@ -256,7 +275,9 @@ public class DemoXORPanel extends JPanel {
                     		rotate = true;
 	                     	move = false;
 	                     	resize = false;
-	                     	
+	                        cX = (boxXmin+boxXmax) / 2;
+	                        cY = (boxYmin+boxYmax) / 2;
+	                        moveStartPoint=new Point(xPos,yPos,false);
 	                    	/*
                         	 * 0-N; 1-NE; 2-E; 3-SE; 4-S; 5-SW; 6-W; 7-NW
                         	 * 
@@ -491,5 +512,7 @@ public class DemoXORPanel extends JPanel {
     private boolean rotate = false;
     private boolean resize = false;
     private boolean move = false;
+    private double cX;
+	private double cY;
 
 }
