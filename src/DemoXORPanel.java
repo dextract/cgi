@@ -75,10 +75,14 @@ public class DemoXORPanel extends JPanel {
                 	setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                 }
                 else if(resize == true)
-                        System.out.println("resizing box");
-                else if(rotate == true)
-                	    System.out.println("rotating box");
+                    System.out.println("resizing box");
+                else if(rotate == true) {
+                	System.out.println("rotating box");
+                	cX = (boxXmax + boxXmin) / 2;
+                	cY = (boxYmax + boxYmin) / 2;
+                }
                         
+                editStartPoint=new Point(xPos,yPos,false);
                 
                 Graphics2D g = (Graphics2D) getGraphics();
                 
@@ -134,13 +138,13 @@ public class DemoXORPanel extends JPanel {
                 else if(move) {
  
                 	for(Point p: points) {
-                		p.setNewX(p.getX()+(x-moveStartPoint.getX()));
-                		p.setNewY(p.getY()+(y-moveStartPoint.getY()));
+                		p.setNewX(p.getX()+(x-editStartPoint.getX()));
+                		p.setNewY(p.getY()+(y-editStartPoint.getY()));
                 		repaint();
                 	}
                 	
-                	moveStartPoint.setNewX(x);
-            		moveStartPoint.setNewY(y);
+                	editStartPoint.setNewX(x);
+            		editStartPoint.setNewY(y);
                 	
                 }           
                 else if(resize) {
@@ -148,7 +152,7 @@ public class DemoXORPanel extends JPanel {
                 		case 0: { // Resize cima
                 			// Factor multiplicante com base no ponto com o maior y
 		                	double multFactor = boxYmax-e.getY();
-		                	multFactor /= boxYmax-moveStartPoint.getY();
+		                	multFactor /= boxYmax-editStartPoint.getY();
 		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
 		                	// voltem aos sitios correctos
 		                	int sub = (int) (boxYmax*multFactor-boxYmax);
@@ -161,7 +165,7 @@ public class DemoXORPanel extends JPanel {
                 		case 2: { // Resize direita
                 			// Factor multiplicante com base no ponto com o menor x
 		                	double multFactor = e.getX()-boxXmin;
-		                	multFactor /= moveStartPoint.getX()-boxXmin;
+		                	multFactor /= editStartPoint.getX()-boxXmin;
 		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
 		                	// voltem aos sitios correctos
 		                	int sub = (int) (boxXmin*multFactor-boxXmin);
@@ -174,7 +178,7 @@ public class DemoXORPanel extends JPanel {
                 		case 4: { // Resize baixo
                 			// Factor multiplicante com base no ponto com o menor y
 		                	double multFactor = e.getY()-boxYmin;
-		                	multFactor /= moveStartPoint.getY()-boxYmin;
+		                	multFactor /= editStartPoint.getY()-boxYmin;
 		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
 		                	// voltem aos sitios correctos
 		                	int sub = (int) (boxYmin*multFactor-boxYmin);
@@ -187,7 +191,7 @@ public class DemoXORPanel extends JPanel {
                 		case 6: { // Resize esquerda
                 			// Factor multiplicante com base no ponto com o maior x
 		                	double multFactor = boxXmax-e.getX();
-		                	multFactor /= boxXmax-moveStartPoint.getX();
+		                	multFactor /= boxXmax-editStartPoint.getX();
 		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
 		                	// voltem aos sitios correctos
 		                	int sub = (int) (boxXmax*multFactor-boxXmax);
@@ -199,30 +203,44 @@ public class DemoXORPanel extends JPanel {
                 		}
                 		default: break;
                 	}
-                	moveStartPoint.setNewX(x);
-                	moveStartPoint.setNewY(y);
+                	editStartPoint.setNewX(x);
+                	editStartPoint.setNewY(y);
                 } 
                 else if (rotate) {
-                	double c = Math.sqrt(Math.pow(moveStartPoint.getX() - cX, 2) + Math.pow(moveStartPoint.getY() - cY, 2));
-                	double alpha = (Math.acos((moveStartPoint.getY() - cY) / c));
-                	double beta = (Math.acos((e.getY() - cY) / c));
-                	          	
-                  	//System.out.println(beta-alpha);
-                  	
-      
-                  	/*
-                  	 * p'x = cos(theta) * (px-ox) - sin(theta) * (py-oy) + ox
-					 * p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
-                  	 */
+
+                	
+                	
+                	double u1 = editStartPoint.getX() - cX;
+                	double u2 = editStartPoint.getY() - cY;
+                	double v1 = e.getX() - cX;
+                	double v2 = e.getY() - cY;
+                	
+                	double vA = Math.sqrt(Math.pow(editStartPoint.getX()-cX, 2) + Math.pow(editStartPoint.getY()-cY, 2));
+                	double vB = Math.sqrt(Math.pow(e.getX()-cX, 2) + Math.pow(e.getY()-cY, 2));
+                	 
+                	
+                	double cp = u1*v2 - u2 * v1;
+                	
+                			
+                	double theta = Math.acos( (u1 * v1 + u2 * v2) / (Math.sqrt(u1*u1 + u2*u2) * Math.sqrt(v1*v1 + v2*v2))); 
+                	
+                	
+                	
                 	for(Point p: points) {
-                		p.setNewX((int) ((p.getX() - cX) * Math.cos(beta-alpha) - (p.getY()-cY) * Math.sin(beta-alpha) + cX));
-                		p.setNewY((int) ((p.getX() - cX) * Math.sin(beta-alpha) + (p.getY()-cY) * Math.cos(beta-alpha) + cY));
-               
+                		
+                		double oldX = p.getX() - cX; 
+                		double oldY = p.getY() - cY;
+                		
+                		double newX = oldX * Math.cos(theta) - oldY * Math.sin(theta);
+                		double newY = oldX * Math.sin(theta) + oldY * Math.cos(theta); 
+                		newX += cX;
+                		newY += cY;
+                		
+                		p.setNewX((int) newX);
+                		p.setNewY((int) newY);
+                		
                 		repaint();
                 	}
-                	
-                	moveStartPoint.setNewX(x);
-            		moveStartPoint.setNewY(y);
                 }
             }
             
@@ -242,7 +260,7 @@ public class DemoXORPanel extends JPanel {
                     		rotate = false;
                             move = false;
                             resize = true;
-                            moveStartPoint=new Point(xPos,yPos,false);
+                            
                         	/*
                         	 * 0-N; 1-NE; 2-E; 3-SE; 4-S; 5-SW; 6-W; 7-NW
                         	 * 
@@ -267,7 +285,7 @@ public class DemoXORPanel extends JPanel {
 	                            rotate = false;
 	                            move = true;
 	                            resize = false;
-	                            moveStartPoint=new Point(xPos,yPos,false);
+	                            
                         	}
                         }
                     	// Rotate
@@ -277,7 +295,7 @@ public class DemoXORPanel extends JPanel {
 	                     	resize = false;
 	                        cX = (boxXmin+boxXmax) / 2;
 	                        cY = (boxYmin+boxYmax) / 2;
-	                        moveStartPoint=new Point(xPos,yPos,false);
+	                       
 	                    	/*
                         	 * 0-N; 1-NE; 2-E; 3-SE; 4-S; 5-SW; 6-W; 7-NW
                         	 * 
@@ -311,8 +329,7 @@ public class DemoXORPanel extends JPanel {
                 if(!linhaPresa) return;         // Nao estamos a meio da especificacao duma linha!
                
                 existeLinha = true;
-    
-                
+                    
                 // Colocar em modo de desenho XOR
                 Graphics2D g = (Graphics2D) getGraphics();
                 g.setXORMode(getBackground());
@@ -506,7 +523,7 @@ public class DemoXORPanel extends JPanel {
     private List<Point> points = new ArrayList<Point>();
     private int xPosInicial, yPosInicial;
     private int xPosAnterior, yPosAnterior;
-    private Point moveStartPoint = null;
+    private Point editStartPoint = null;
     private Point grabbedPoint = null;
     private int boxXmin, boxXmax, boxYmin, boxYmax;
     private boolean rotate = false;
