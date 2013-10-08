@@ -111,7 +111,8 @@ public class DemoXORPanel extends JPanel {
                     drawSquare(xPos, yPos, g);
                     if(boundingBox)
                         drawBoundingBox(g);
-                    calculateCoeffs(points, g);
+                    if(bezierCurve)
+                    	drawBezierCurve(points, g);
                 
                 }
                 else if(points.size()<nPoints-1){   // Estamos a iniciar uma linha
@@ -142,7 +143,7 @@ public class DemoXORPanel extends JPanel {
                     }
                     repaint();     
                 }
-                else if(move) {
+                else if(move && !exited) {
                 	for(Point p: points) {
                 		p.setNewX(p.getX()+(x-editStartPoint.getX()));
                 		p.setNewY(p.getY()+(y-editStartPoint.getY()));
@@ -151,7 +152,7 @@ public class DemoXORPanel extends JPanel {
                 	editStartPoint.setNewX(x);
                 	editStartPoint.setNewY(y);
                 }           
-                else if(resize) {
+                else if(resize && !exited) {
                 	switch(resizeSide) {
                 		case 0: { // Resize cima
                 			// Factor multiplicante com base no ponto com o maior y
@@ -443,10 +444,9 @@ public class DemoXORPanel extends JPanel {
                 	double cp = u1*v2 - u2 * v1;
                 	
                 			
-                	double theta = Math.acos( (u1 * v1 + u2 * v2) / (Math.sqrt(u1*u1 + u2*u2) * Math.sqrt(v1*v1 + v2*v2))); 
-                	
-                	
-                	
+                	double theta = Math.acos((u1 * v1 + u2 * v2) / (Math.sqrt(u1*u1 + u2*u2) * Math.sqrt(v1*v1 + v2*v2))); 
+                
+
                 	for(Point p: points) {
                 		
                 		double oldX = p.getX() - cX; 
@@ -611,13 +611,13 @@ public class DemoXORPanel extends JPanel {
                 if(i==points.size()-2)
                         drawSquare(sp.getX(), sp.getY(), g2);        
             }
-            calculateCoeffs(points, g2);
+           
+            if(bezierCurve)
+            	drawBezierCurve(points, g2);
             
         }
 
     }
-    
-    //public void draw
     
     // Metodo adicionado para se poder receber, do exterior (neste caso do Frame), 
     // um pedido para limpar o conteudo
@@ -687,28 +687,91 @@ public class DemoXORPanel extends JPanel {
                     if(i==points.size()-2)
                             drawSquare(sp.getX(), sp.getY(), g);        
                 }
-                calculateCoeffs(points, g);
+                
+                if(bezierCurve)
+                	drawBezierCurve(points, g);
                 
         }
     }
     
     public void setPointNumber(int n) {
+        System.out.println(boundingBox);
         
-        nPoints = n;
-        limparDesenho();
+        if(nPoints == n) {
+        	System.out.println("Já existem " + n + " pontos.");
+        }
+        else {   		
+	        nPoints = n;
+	        limparDesenho();
+        }
+        
     }
         
     public void changeOption(int n) {
 		Graphics2D g = (Graphics2D) getGraphics();
 	    // 1 - bounding box
-	    // 
+	    // 2 - bezier curve
+		// 3 - polyline
+		
 	    if(n==1)
 	    	boundingBox = (boundingBox) ? false : true;
+	    if(n==2)
+	    	bezierCurve = (bezierCurve) ? false : true;
+	    if(n==3)
+	    	polyline = (polyline) ? false : true;
 	    
 	    if(boundingBox)
 	    	drawBoundingBox(g);
-	    else
-	    	repaint();
+	    if(bezierCurve)
+	    	drawBezierCurve(points, g);
+	    
+	     repaint();
+    }
+    
+    
+    public void drawBezierCurve(List<Point> points, Graphics2D g) {
+    	
+    	List<Point> firstGroup;
+		List<Point> secondGroup;
+		List<Point> thirdGroup;
+    	
+    	if(nPoints == 4) {
+    		calculateCoeffs(points, g);
+    	}
+    	else if(nPoints == 7){
+    		
+    		firstGroup = new ArrayList<Point>();
+    		secondGroup = new ArrayList<Point>();
+    		
+    		for(int i = 0; i < 4; i++) {
+    			firstGroup.add(points.get(i));
+    			secondGroup.add(points.get(i+3));
+    		}
+    		
+    		calculateCoeffs(firstGroup, g);
+    		g.setColor(Color.blue);
+    		calculateCoeffs(secondGroup, g);
+    		g.setColor(Color.black);
+    	}
+    	else if(nPoints == 10) {
+    		
+    		firstGroup = new ArrayList<Point>();
+    		secondGroup = new ArrayList<Point>();
+    		thirdGroup = new ArrayList<Point>();
+    		
+    		for(int i = 0; i < 4; i++) {
+    			firstGroup.add(points.get(i));
+    			secondGroup.add(points.get(i+3));
+    			thirdGroup.add(points.get(i+6));
+    		}
+    		
+    		calculateCoeffs(firstGroup, g);
+    		g.setColor(Color.blue);
+    		calculateCoeffs(secondGroup, g);
+    		g.setColor(Color.red);
+    		calculateCoeffs(thirdGroup, g);
+    		g.setColor(Color.black);
+    	}
     }
 
     public void calculateCoeffs(List<Point> points, Graphics2D g) {
@@ -726,7 +789,7 @@ public class DemoXORPanel extends JPanel {
         int[] cy = new int[4];
 
         int i = 0;
-
+        
         for(Point p: points) {
             x[i]=p.getX();
             y[i]=p.getY();
@@ -745,8 +808,8 @@ public class DemoXORPanel extends JPanel {
         for(i=0;i<cy.length;i++) 
                 System.out.print(cy[i]+" ");*/
 
-        drawCurve(cx, cy, 1000, g);
-            
+       drawCurve(cx, cy, 1000, g);
+        
     }         
         
     /**
@@ -776,6 +839,8 @@ public class DemoXORPanel extends JPanel {
     }
     
     private boolean boundingBox = false;
+    private boolean bezierCurve = false;
+    private boolean polyline = true;
     private boolean existeLinha = false;
     private boolean linhaPresa = false;
     private boolean exited = false;
