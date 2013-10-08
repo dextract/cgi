@@ -1,5 +1,8 @@
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -27,15 +30,18 @@ public class DemoXORFrame extends JFrame {
 		setJMenuBar(barra);
 		
 		painel = new DemoXORPanel();
-		//painel.setBackground(Color.DARK_GRAY);
+
+		painel.limparDesenho();
 		painel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 		setContentPane(painel);
 	}
 	
 	
 	private JMenu criarMenuOpcoes() {
-		JMenu menu = new JMenu("Opçoes");
-		menu.add(criarItemMenuOpcoes("Bounding Box"));
+		JMenu menu = new JMenu("Visualization Options");
+		menu.add(criarItemMenuOpcoes("Polyline"));
+		menu.add(criarItemMenuOpcoes("Bounding box"));
+		menu.add(criarItemMenuOpcoes("Bezier curve"));
 		return menu;
 	}
 
@@ -53,11 +59,34 @@ public class DemoXORFrame extends JFrame {
 		class ListenerItemMenu implements ActionListener
 		{
 			public void actionPerformed(ActionEvent e) {
-				if(e.getActionCommand().equals("Bounding Box") && item.isSelected())
-					item.setSelected(true);
-				else if(e.getActionCommand().equals("Bounding Box") && !item.isSelected())
-					item.setSelected(false);
-				painel.changeOption(1);
+				
+				if(e.getActionCommand().equals("Bounding box")) {
+					
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);
+					
+					painel.changeOption(1);
+				}
+				else if(e.getActionCommand().equals("Bezier curve")) {
+				
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);
+					
+					painel.changeOption(2);
+				}
+				else if(e.getActionCommand().equals("Polyline")) {
+					
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);
+					
+					painel.changeOption(3);
+				}
 			}	
 		}
 		
@@ -134,7 +163,7 @@ public class DemoXORFrame extends JFrame {
 			{
 				if(e.getActionCommand().equals("About"))
 					JOptionPane.showMessageDialog(null, 
-							"Demo para programar em Java/Swing\n\n(M. Pr\u00F3spero e F. Birra)\n");
+							"Trabalho Prático 1 \n - Vladislav Pinzhuro, 34224\n - João Costa, 41726");
 			}
 		}
 		
