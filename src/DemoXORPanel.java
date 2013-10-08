@@ -729,14 +729,14 @@ public class DemoXORPanel extends JPanel {
     }
     
     
-    public void drawBezierCurve(List<Point> points, Graphics2D g) {
+    public void drawBezierCurve(List<Point> pts, Graphics2D g) {
     	
     	List<Point> firstGroup;
 		List<Point> secondGroup;
 		List<Point> thirdGroup;
     	
     	if(nPoints == 4) {
-    		calculateCoeffs(points, g);
+    		calculateCoeffs(pts, g);
     	}
     	else if(nPoints == 7){
     		
@@ -744,8 +744,8 @@ public class DemoXORPanel extends JPanel {
     		secondGroup = new ArrayList<Point>();
     		
     		for(int i = 0; i < 4; i++) {
-    			firstGroup.add(points.get(i));
-    			secondGroup.add(points.get(i+3));
+    			firstGroup.add(pts.get(i));
+    			secondGroup.add(pts.get(i+3));
     		}
     		
     		calculateCoeffs(firstGroup, g);
@@ -760,9 +760,9 @@ public class DemoXORPanel extends JPanel {
     		thirdGroup = new ArrayList<Point>();
     		
     		for(int i = 0; i < 4; i++) {
-    			firstGroup.add(points.get(i));
-    			secondGroup.add(points.get(i+3));
-    			thirdGroup.add(points.get(i+6));
+    			firstGroup.add(pts.get(i));
+    			secondGroup.add(pts.get(i+3));
+    			thirdGroup.add(pts.get(i+6));
     		}
     		
     		calculateCoeffs(firstGroup, g);
@@ -774,7 +774,7 @@ public class DemoXORPanel extends JPanel {
     	}
     }
 
-    public void calculateCoeffs(List<Point> points, Graphics2D g) {
+    public void calculateCoeffs(List<Point> pts, Graphics2D g) {
             
         int[][] bezierM = 
                 {       {-1,3,-3,1},
@@ -790,7 +790,7 @@ public class DemoXORPanel extends JPanel {
 
         int i = 0;
         
-        for(Point p: points) {
+        for(Point p: pts) {
             x[i]=p.getX();
             y[i]=p.getY();
             i++;
@@ -801,14 +801,14 @@ public class DemoXORPanel extends JPanel {
             cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
         }
         
-        /*System.out.println();
+        System.out.println();
         for(i=0;i<cx.length;i++) 
                 System.out.print(cx[i]+" ");
         System.out.println();
         for(i=0;i<cy.length;i++) 
-                System.out.print(cy[i]+" ");*/
+                System.out.print(cy[i]+" ");
 
-       drawCurve(cx, cy, 1000, g);
+       drawCurve(pts, cx, cy, 1000, g);
         
     }         
         
@@ -817,14 +817,14 @@ public class DemoXORPanel extends JPanel {
      * @param cy Coefficients for y(t): Cy=M*Gy
      * @param n Number of steps
      */
-    public void drawCurve(int[] cx, int[] cy, int n, Graphics2D g) {
+    public void drawCurve(List<Point> pts, int[] cx, int[] cy, int n, Graphics2D g) {
         g.setStroke(new BasicStroke(2));
         double t = 0;
         double delta = 1.0/n;
         double t2, t3;
         int x, y;
-        int prevx = points.get(0).getX();
-        int prevy = points.get(0).getY();
+        int prevx = pts.get(0).getX();
+        int prevy = pts.get(0).getY();
         
         for(int i=0;i<n;i++) {  
             t+=delta;
