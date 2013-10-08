@@ -78,23 +78,21 @@ public class DemoXORPanel extends JPanel {
                 
                 if(grabbedPoint==null) {
 		            if(move == true) {
-		            	editStartPoint=new Point(xPos,yPos,false);
 		            	setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 		            	editOn=true;
 		            }
 		            else if(resize == true) {
 		                System.out.println("resizing box");
-		                editStartPoint=new Point(xPos,yPos,false);
 		                editOn=true;
 		            }
 		            else if(rotate == true) {
 		            	System.out.println("rotating box");
-		            	editStartPoint=new Point(xPos,yPos,false);
+		            	cX = (boxXmax + boxXmin) / 2;
+	                	cY = (boxYmax + boxYmin) / 2;
 		            	editOn=true;
 		            }
+	            	editStartPoint=new Point(xPos,yPos,false);
                 }
-                
-                        
                 
                 Graphics2D g = (Graphics2D) getGraphics();
                 
@@ -151,7 +149,7 @@ public class DemoXORPanel extends JPanel {
                 		repaint();
                 	}
                 	editStartPoint.setNewX(x);
-            		editStartPoint.setNewY(y);
+                	editStartPoint.setNewY(y);
                 }           
                 else if(resize) {
                 	switch(resizeSide) {
@@ -432,8 +430,38 @@ public class DemoXORPanel extends JPanel {
                 		default: break;
                 	}
                 } 
-                else if (rotate) {
- 
+                else if (rotate) { 	
+                	double u1 = editStartPoint.getX() - cX;
+                	double u2 = editStartPoint.getY() - cY;
+                	double v1 = e.getX() - cX;
+                	double v2 = e.getY() - cY;
+                	
+                	double vA = Math.sqrt(Math.pow(editStartPoint.getX()-cX, 2) + Math.pow(editStartPoint.getY()-cY, 2));
+                	double vB = Math.sqrt(Math.pow(e.getX()-cX, 2) + Math.pow(e.getY()-cY, 2));
+                	 
+                	
+                	double cp = u1*v2 - u2 * v1;
+                	
+                			
+                	double theta = Math.acos( (u1 * v1 + u2 * v2) / (Math.sqrt(u1*u1 + u2*u2) * Math.sqrt(v1*v1 + v2*v2))); 
+                	
+                	
+                	
+                	for(Point p: points) {
+                		
+                		double oldX = p.getX() - cX; 
+                		double oldY = p.getY() - cY;
+                		
+                		double newX = oldX * Math.cos(theta) - oldY * Math.sin(theta);
+                		double newY = oldX * Math.sin(theta) + oldY * Math.cos(theta); 
+                		newX += cX;
+                		newY += cY;
+                		
+                		p.setNewX((int) newX);
+                		p.setNewY((int) newY);
+                		
+                		repaint();
+                	}
                 }
             }
             
@@ -535,8 +563,7 @@ public class DemoXORPanel extends JPanel {
                 if(!linhaPresa) return;         // Nao estamos a meio da especificacao duma linha!
                
                 existeLinha = true;
-    
-                
+                    
                 // Colocar em modo de desenho XOR
                 Graphics2D g = (Graphics2D) getGraphics();
                 g.setXORMode(getBackground());
