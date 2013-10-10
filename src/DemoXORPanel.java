@@ -89,6 +89,7 @@ public class DemoXORPanel extends JPanel {
 		            	System.out.println("rotating box");
 		            	cX = (boxXmax + boxXmin) / 2;
 	                	cY = (boxYmax + boxYmin) / 2;
+	                	op = getPointsCopy(points);
 		            	editOn=true;
 		            }
 	            	editStartPoint=new Point(xPos,yPos,false);
@@ -432,36 +433,32 @@ public class DemoXORPanel extends JPanel {
                 	}
                 } 
                 else if (rotate) { 	
+                	
                 	double u1 = editStartPoint.getX() - cX;
                 	double u2 = editStartPoint.getY() - cY;
                 	double v1 = e.getX() - cX;
                 	double v2 = e.getY() - cY;
-                	
-                	double vA = Math.sqrt(Math.pow(editStartPoint.getX()-cX, 2) + Math.pow(editStartPoint.getY()-cY, 2));
-                	double vB = Math.sqrt(Math.pow(e.getX()-cX, 2) + Math.pow(e.getY()-cY, 2));
-                	 
-                	
-                	double cp = u1*v2 - u2 * v1;
-                	
-                			
                 	double theta = Math.acos((u1 * v1 + u2 * v2) / (Math.sqrt(u1*u1 + u2*u2) * Math.sqrt(v1*v1 + v2*v2))); 
-                
-
+                                  	
+                	
+                	int i = 0;
+                                  	
                 	for(Point p: points) {
                 		
-                		double oldX = p.getX() - cX; 
-                		double oldY = p.getY() - cY;
-                		
-                		double newX = oldX * Math.cos(theta) - oldY * Math.sin(theta);
-                		double newY = oldX * Math.sin(theta) + oldY * Math.cos(theta); 
-                		newX += cX;
-                		newY += cY;
+                		double oldX = op.get(i).getX() - cX; 
+                		double oldY = op.get(i).getY() - cY;              
+                		double newX = oldX * Math.cos(theta) - oldY * Math.sin(theta) + cX;
+                		double newY = oldX * Math.sin(theta) + oldY * Math.cos(theta) + cY; 
+
                 		
                 		p.setNewX((int) newX);
                 		p.setNewY((int) newY);
                 		
                 		repaint();
+                		
+                		i++;
                 	}
+                	
                 }
             }
             
@@ -633,6 +630,19 @@ public class DemoXORPanel extends JPanel {
     public void drawSquare(int x, int y, Graphics2D g) {
             g.drawRect(x - 5, y - 5, 10, 10);       
     }
+    
+    public List<Point> getPointsCopy(List<Point> ps) {
+
+    	List<Point> copy = new ArrayList<Point>();
+    	Point cp;
+    	
+    	for(Point p: ps) {
+    		cp = new Point(p.getX(),p.getY(),p.isLast());
+    		copy.add(cp);
+    	}
+    	return copy;
+    }
+
     
     public void drawBoundingBox(Graphics2D g) {
         if(!linhaPresa) {
@@ -859,5 +869,5 @@ public class DemoXORPanel extends JPanel {
     private boolean editOn = false;
     private double cX;
 	private double cY;
-
+	private List<Point> op = new ArrayList<Point>();
 }
