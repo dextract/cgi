@@ -480,45 +480,17 @@ public class DemoXORPanel extends JPanel {
                 	}
                 } 
                 else if (rotate) { 	
-                	
-                	double u1 = editStartPoint.getX() - cX;
-                	double u2 = editStartPoint.getY() - cY;
-                	double v1 = e.getX() - cX;
-                	double v2 = e.getY() - cY;
-                	
-                	
-                	/*
-                	double h1;
-                	double h2;
+
                 	double alpha;
                 	double beta;
                 	double theta;
+    
+                	alpha = Math.atan2(editStartPoint.getX() - cX, editStartPoint.getY() - cY);
+                	beta = Math.atan2(x - cX, y - cY);
                 	
-                	h1 = Math.sqrt(Math.pow(editStartPoint.getX() - cX, 2) + Math.pow(editStartPoint.getY() - cY,2));
-                	h2 = Math.sqrt(Math.pow(e.getX() - cX, 2) + Math.pow(e.getY() - cY,2));
-                	alpha = Math.cos((editStartPoint.getX() - cX) / h1);
-                	beta = Math.cos((x - cX) / h2);
-                	*/
-                	double theta = Math.acos((u1 * v1 + u2 * v2) / (Math.sqrt(u1*u1 + u2*u2) * Math.sqrt(v1*v1 + v2*v2))); 
-                                  	
-             
-                	System.out.println(theta);
+                	theta = alpha - beta;
                 	
-                	if(x >= cX && y >= cY) { //1º
-                		
-                	}
-                	else if(x <= cX && y >= cY) { //2º
-					                		
-					}
-                	else if(x <= cX && y <= cY) { //3º
-						theta = Math.PI + theta;
-					}
-                	else if(x >= cX && y <= cY) { //4º
-						
-					}
-                	
-                	
-                	
+
                 	int i = 0;
                                   	
                 	for(Point p: points) {
