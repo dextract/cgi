@@ -71,7 +71,7 @@ public class DemoXORPanel extends JPanel {
                 int xPos = e.getX();
                 int yPos = e.getY();
                 
-                //clicar numa vizinhanÃ§a de um ponto
+                //clicar numa vizinhanÃƒÂ§a de um ponto
                 for(Point p: points)
                     if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5)
                         grabbedPoint = p;
@@ -131,7 +131,7 @@ public class DemoXORPanel extends JPanel {
         MouseMotionListener mml = new MouseMotionAdapter() {
                 
             public void mouseDragged(MouseEvent e) {
-                if(points.size() < nPoints) return; //ainda nÃ£o se finalizou a linha por isso nÃ£o deve poder arrastar pontos
+                if(points.size() < nPoints) return; //ainda nÃƒÂ£o se finalizou a linha por isso nÃƒÂ£o deve poder arrastar pontos
                  
                 // Obter a posicao actual do cursor
                 int x = e.getX();
@@ -485,8 +485,39 @@ public class DemoXORPanel extends JPanel {
                 	double u2 = editStartPoint.getY() - cY;
                 	double v1 = e.getX() - cX;
                 	double v2 = e.getY() - cY;
+                	
+                	
+                	/*
+                	double h1;
+                	double h2;
+                	double alpha;
+                	double beta;
+                	double theta;
+                	
+                	h1 = Math.sqrt(Math.pow(editStartPoint.getX() - cX, 2) + Math.pow(editStartPoint.getY() - cY,2));
+                	h2 = Math.sqrt(Math.pow(e.getX() - cX, 2) + Math.pow(e.getY() - cY,2));
+                	alpha = Math.cos((editStartPoint.getX() - cX) / h1);
+                	beta = Math.cos((x - cX) / h2);
+                	*/
                 	double theta = Math.acos((u1 * v1 + u2 * v2) / (Math.sqrt(u1*u1 + u2*u2) * Math.sqrt(v1*v1 + v2*v2))); 
                                   	
+             
+                	System.out.println(theta);
+                	
+                	if(x >= cX && y >= cY) { //1º
+                		
+                	}
+                	else if(x <= cX && y >= cY) { //2º
+					                		
+					}
+                	else if(x <= cX && y <= cY) { //3º
+						theta = Math.PI + theta;
+					}
+                	else if(x >= cX && y <= cY) { //4º
+						
+					}
+                	
+                	
                 	
                 	int i = 0;
                                   	
@@ -515,7 +546,7 @@ public class DemoXORPanel extends JPanel {
                 int xPos = e.getX();
                 int yPos = e.getY();
                 
-                if(points.size() == nPoints) //linha já terminada
+                if(points.size() == nPoints) //linha jÃ¡ terminada
                         
                     if(boundingBox) {
                     	
@@ -530,26 +561,43 @@ public class DemoXORPanel extends JPanel {
                         	 * 0-N; 1-NE; 2-E; 3-SE; 4-S; 5-SW; 6-W; 7-NW
                         	 * 
                         	 */
-                            if( (yPos-boxYmin<=5) && (boxXmax-xPos<=5) )
-                        		resizeSide = 1;
-                            else if( (boxYmax-yPos<=5) && (boxXmax-xPos<=5) )
+                            if( (yPos-boxYmin<=5) && (boxXmax-xPos<=5) ) {
+                        		resizeSide = 1; 
+                        		setCursor(Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR));
+                            }
+                            else if( (boxYmax-yPos<=5) && (boxXmax-xPos<=5) ) {
                         		resizeSide = 3;
-                            else if( (boxYmax-yPos<=5) && (xPos-boxXmin<=5) )
+                        		setCursor(Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR));
+                            }
+                            else if( (boxYmax-yPos<=5) && (xPos-boxXmin<=5) ) {
                         		resizeSide = 5;
-                            else if( (yPos-boxYmin<=5) && (xPos-boxXmin<=5) )
+                        		setCursor(Cursor.getPredefinedCursor(Cursor.SW_RESIZE_CURSOR));
+                            }
+                            else if( (yPos-boxYmin<=5) && (xPos-boxXmin<=5) ) {
                         		resizeSide = 7;
-                            else if(yPos-boxYmin<=5)
+                        		setCursor(Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
+                            }
+                            else if(yPos-boxYmin<=5) {
                                 resizeSide = 0;
-                            else if(boxXmax-xPos<=5)
+                                setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+                            }
+                            else if(boxXmax-xPos<=5) {
                         		resizeSide = 2;
-                            else if(boxYmax-yPos<=5)
+                        		setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+                            }
+                            else if(boxYmax-yPos<=5) {
                         		resizeSide = 4;
-                            else if(xPos-boxXmin<=5)
+                        		setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
+                            }
+                            else if(xPos-boxXmin<=5) {
                                 resizeSide = 6;
+                                setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+                            }
                         	else {
 	                            rotate = false;
 	                            move = true;
 	                            resize = false;
+	                            setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                         	}
                         }
                     	// Rotate
@@ -557,6 +605,7 @@ public class DemoXORPanel extends JPanel {
                     			|| 	((Math.abs(boxYmax-yPos)<=5) && (xPos-boxXmax<=5 && boxXmin-xPos<=5))
                     			||	((Math.abs(boxXmin-xPos)<=5) && (yPos-boxYmax<=5 && boxYmin-yPos<=5))
                     			|| 	((Math.abs(boxXmax-xPos)<=5) && (yPos-boxYmax<=5 && boxYmin-yPos<=5)) ) {
+                    		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); 
                     		rotate = true;
 	                     	move = false;
 	                     	resize = false;
@@ -600,6 +649,7 @@ public class DemoXORPanel extends JPanel {
 							rotate = false;
 						 	move = false;
 						 	resize = false;
+						 	setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 						}
                     	
                     }
@@ -755,7 +805,7 @@ public class DemoXORPanel extends JPanel {
         System.out.println(boundingBox);
         
         if(nPoints == n) {
-        	System.out.println("Já existem " + n + " pontos.");
+        	System.out.println("JÃ¡ existem " + n + " pontos.");
         }
         else {   		
 	        nPoints = n;
