@@ -56,7 +56,7 @@ public class DemoXORPanel extends JPanel {
             	rotate=false;
             	editOn=false;
             	
-            	if(boundingBox)
+            	if(boundingBox && points.size() == nPoints)
             		drawBoundingBox((Graphics2D) getGraphics());
             	
                 setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
@@ -110,9 +110,9 @@ public class DemoXORPanel extends JPanel {
                     linhaPresa = false;
                     points.add(new Point(xPos, yPos, true));
                     drawSquare(xPos, yPos, g);
-                    if(boundingBox)
+                    if(boundingBox && points.size() == nPoints)
                         drawBoundingBox(g);
-                    if(bezierCurve)
+                    if(bezierCurve && points.size() == nPoints)
                     	drawBezierCurve(points, g);
                 
                 }
@@ -662,7 +662,7 @@ public class DemoXORPanel extends JPanel {
         Point sp;
         
         if(existeLinha) {
-        	if(boundingBox) 
+        	if(boundingBox && points.size() == nPoints) 
                 drawBoundingBox(g2);
         	g2.setStroke(new BasicStroke(1));
             for(int i = 0; i < points.size() - 1; i++) {
@@ -799,9 +799,9 @@ public class DemoXORPanel extends JPanel {
 	    if(n==3)
 	    	polyline = (polyline) ? false : true;
 	    
-	    if(boundingBox)
+	    if(boundingBox && points.size() == nPoints)
 	    	drawBoundingBox(g);
-	    if(bezierCurve)
+	    if(bezierCurve && points.size() == nPoints)
 	    	drawBezierCurve(points, g);
 	    
 	     repaint();
@@ -880,12 +880,12 @@ public class DemoXORPanel extends JPanel {
             cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
         }
         
-        System.out.println();
+        /*System.out.println();
         for(i=0;i<cx.length;i++) 
                 System.out.print(cx[i]+" ");
         System.out.println();
         for(i=0;i<cy.length;i++) 
-                System.out.print(cy[i]+" ");
+                System.out.print(cy[i]+" ");*/
 
        drawCurve(pts, cx, cy, 1000, g);
         
