@@ -112,8 +112,8 @@ public class DemoXORPanel extends JPanel {
                     drawSquare(xPos, yPos, g);
                     if(boundingBox && points.size() == nPoints)
                         drawBoundingBox(g);
-                    if(bezierCurve && points.size() == nPoints)
-                    	drawBezierCurve(points, g);
+            	    if( (bezierCurve||bspline||catmull) && points.size() == nPoints )
+            	    	drawCurves(points, g);
                 
                 }
                 else if(points.size()<nPoints-1){   // Estamos a iniciar uma linha
@@ -517,10 +517,20 @@ public class DemoXORPanel extends JPanel {
                 // Obter a posicao actual do cursor
                 int xPos = e.getX();
                 int yPos = e.getY();
+                boolean overPoint = false;
+                
                 
                 if(points.size() == nPoints) //linha jÃ¡ terminada
                         
-                    if(boundingBox) {
+                	for(Point p: points)
+                        if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5) {
+                         overPoint = true;
+                         setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                        }
+                	
+                    if(boundingBox&&!overPoint) {
+                    	
+                    	
                     	
                     	// Move & Resize
                     	if(	(boxXmin<=xPos && xPos<=boxXmax) &&
@@ -678,8 +688,8 @@ public class DemoXORPanel extends JPanel {
                         drawSquare(sp.getX(), sp.getY(), g2);        
             }
            
-            if(bezierCurve)
-            	drawBezierCurve(points, g2);
+            if(bezierCurve||bspline||catmull)
+            	drawCurves(points, g2);
             
         }
 
@@ -767,8 +777,8 @@ public class DemoXORPanel extends JPanel {
                             drawSquare(sp.getX(), sp.getY(), g);        
                 }
                 
-                if(bezierCurve)
-                	drawBezierCurve(points, g);
+                if(bezierCurve||bspline||catmull)
+                	drawCurves(points, g);
                 
         }
     }
@@ -788,9 +798,6 @@ public class DemoXORPanel extends JPanel {
         
     public void changeOption(int n) {
 		Graphics2D g = (Graphics2D) getGraphics();
-	    // 1 - bounding box
-	    // 2 - bezier curve
-		// 3 - polyline
 		
 	    if(n==1)
 	    	boundingBox = (boundingBox) ? false : true;
@@ -798,17 +805,23 @@ public class DemoXORPanel extends JPanel {
 	    	bezierCurve = (bezierCurve) ? false : true;
 	    if(n==3)
 	    	polyline = (polyline) ? false : true;
+	    if(n==4)
+	    	bspline = (bspline) ? false : true;
+	    if(n==5)
+	    	catmull = (catmull) ? false : true;
+	    
+	    System.out.println(n+" selected");
 	    
 	    if(boundingBox && points.size() == nPoints)
 	    	drawBoundingBox(g);
-	    if(bezierCurve && points.size() == nPoints)
-	    	drawBezierCurve(points, g);
+	    if( (bezierCurve||bspline||catmull) && points.size() == nPoints )
+	    	drawCurves(points, g);
 	    
-	     repaint();
+	    repaint();
     }
     
     
-    public void drawBezierCurve(List<Point> pts, Graphics2D g) {
+    public void drawCurves(List<Point> pts, Graphics2D g) {
     	
     	List<Point> firstGroup;
 		List<Point> secondGroup;
@@ -856,10 +869,23 @@ public class DemoXORPanel extends JPanel {
     public void calculateCoeffs(List<Point> pts, Graphics2D g) {
             
         int[][] bezierM = 
-                {       {-1,3,-3,1},
-                        {3,-6,3,0},
-                        {-3,3,0,0},
-                        {1,0,0,0}       };
+            {	{-1,3,-3,1},
+                {3,-6,3,0},
+                {-3,3,0,0},
+                {1,0,0,0}	};
+        
+        double[][] bSplineM =
+    		{	{-0.1666,0.5,-0.5,0.1666},
+    			{0.5,-1,0.5,0},
+    			{-0.5,0,0.5,0},
+    			{0.1666,0.6666,0.1666,0},	};
+        
+        
+        double[][] catmullRomM =
+        	{	{-0.5,1.5,-1.5,0.5},
+        		{1,-2.5,2,-0.5},
+        		{-0.5,0,0.5,0},
+        		{0,1,0,0},	};
         
         int[] x = new int[4];
         int[] y = new int[4];
@@ -875,19 +901,36 @@ public class DemoXORPanel extends JPanel {
             i++;
         }
         
-        for(i=0;i<x.length;i++) {
-            cx[i]=bezierM[i][0]*x[0]+bezierM[i][1]*x[1]+bezierM[i][2]*x[2]+bezierM[i][3]*x[3];
-            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
+        if(bezierCurve) {
+	        for(i=0;i<x.length;i++) {
+	            cx[i]=bezierM[i][0]*x[0]+bezierM[i][1]*x[1]+bezierM[i][2]*x[2]+bezierM[i][3]*x[3];
+	            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
+	        }
+	        drawCurve(pts, cx, cy, 1000, g);
+        }
+        else if(bspline) {
+	        for(i=0;i<x.length;i++) {
+	            cx[i]=(int) (bSplineM[i][0]*x[0]+bSplineM[i][1]*x[1]+bSplineM[i][2]*x[2]+bSplineM[i][3]*x[3]);
+	            cy[i]=(int) (bSplineM[i][0]*y[0]+bSplineM[i][1]*y[1]+bSplineM[i][2]*y[2]+bSplineM[i][3]*y[3]);
+	        }
+	        drawCurve(pts, cx, cy, 1000, g);
+        }
+        else if(catmull) {
+	        for(i=0;i<x.length;i++) {
+	            cx[i]=(int) (catmullRomM[i][0]*x[0]+catmullRomM[i][1]*x[1]+catmullRomM[i][2]*x[2]+catmullRomM[i][3]*x[3]);
+	            cy[i]=(int) (catmullRomM[i][0]*y[0]+catmullRomM[i][1]*y[1]+catmullRomM[i][2]*y[2]+catmullRomM[i][3]*y[3]);
+	        }
+	        drawCurve(pts, cx, cy, 1000, g);
         }
         
-        /*System.out.println();
+        System.out.println();
         for(i=0;i<cx.length;i++) 
                 System.out.print(cx[i]+" ");
         System.out.println();
         for(i=0;i<cy.length;i++) 
-                System.out.print(cy[i]+" ");*/
+                System.out.print(cy[i]+" ");
 
-       drawCurve(pts, cx, cy, 1000, g);
+       
         
     }         
         
@@ -901,7 +944,7 @@ public class DemoXORPanel extends JPanel {
         double t = 0;
         double delta = 1.0/n;
         double t2, t3;
-        int x, y;
+        int x=0, y=0;
         int prevx = pts.get(0).getX();
         int prevy = pts.get(0).getY();
         
@@ -909,8 +952,8 @@ public class DemoXORPanel extends JPanel {
             t+=delta;
             t2=t*t;
             t3=t2*t;
-            x=(int) (cx[0]*t3+cx[1]*t2+cx[2]*t+cx[3]);
-            y=(int) (cy[0]*t3+cy[1]*t2+cy[2]*t+cy[3]);
+	        x=(int) (cx[0]*t3+cx[1]*t2+cx[2]*t+cx[3]);
+	        y=(int) (cy[0]*t3+cy[1]*t2+cy[2]*t+cy[3]);
             g.drawLine(prevx, prevy, x, y);
             prevx=x;
             prevy=y;
@@ -919,6 +962,8 @@ public class DemoXORPanel extends JPanel {
     
     private boolean boundingBox = false;
     private boolean bezierCurve = false;
+    private boolean bspline = false;
+    private boolean catmull = false;
     private boolean polyline = true;
     private boolean existeLinha = false;
     private boolean linhaPresa = false;
