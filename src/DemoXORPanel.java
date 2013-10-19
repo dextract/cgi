@@ -826,6 +826,11 @@ public class DemoXORPanel extends JPanel {
     	List<Point> firstGroup;
 		List<Point> secondGroup;
 		List<Point> thirdGroup;
+		
+		List<Point> tmpGroup = new ArrayList<Point>();
+		List<Point> tmpGroup2 = new ArrayList<Point>();
+		
+		g.setColor(Color.black);
     	
     	if(nPoints == 4) {
     		calculateCoeffs(pts, g);
@@ -837,13 +842,25 @@ public class DemoXORPanel extends JPanel {
     		
     		for(int i = 0; i < 4; i++) {
     			firstGroup.add(pts.get(i));
+    			if(bspline) {
+	    			tmpGroup.add(pts.get(i+1));
+	    			tmpGroup2.add(pts.get(i+2));
+    			}
     			secondGroup.add(pts.get(i+3));
     		}
     		
     		calculateCoeffs(firstGroup, g);
-    		g.setColor(Color.blue);
     		calculateCoeffs(secondGroup, g);
+    		
+    		if(bspline) {
+    			g.setColor(Color.green);
+    			calculateCoeffs(tmpGroup, g);
+    			calculateCoeffs(tmpGroup2, g);
+    		}
+    		
+    		
     		g.setColor(Color.black);
+
     	}
     	else if(nPoints == 10) {
     		
@@ -923,12 +940,12 @@ public class DemoXORPanel extends JPanel {
 	        drawCurve(pts, cx, cy, 1000, g, 2);
         }
         
-        System.out.println();
+     /*   System.out.println();
         for(i=0;i<cx.length;i++) 
                 System.out.print(cx[i]+" ");
         System.out.println();
         for(i=0;i<cy.length;i++) 
-                System.out.print(cy[i]+" ");
+                System.out.print(cy[i]+" ");*/
 
        
         
@@ -959,7 +976,7 @@ public class DemoXORPanel extends JPanel {
 	        if(i == 0) {
 	        	prevx = x;
 	        	prevy = y;
-            }      
+            }
 	        
 	        g.drawLine(prevx, prevy, x, y);
             prevx=x;
