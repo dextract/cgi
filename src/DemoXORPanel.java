@@ -830,6 +830,10 @@ public class DemoXORPanel extends JPanel {
 		List<Point> tmpGroup = new ArrayList<Point>();
 		List<Point> tmpGroup2 = new ArrayList<Point>();
 		
+		List<Point> tmpGroup3 = new ArrayList<Point>();
+		List<Point> tmpGroup4 = new ArrayList<Point>();
+		
+		
 		g.setColor(Color.black);
     	
     	if(nPoints == 4) {
@@ -846,6 +850,10 @@ public class DemoXORPanel extends JPanel {
 	    			tmpGroup.add(pts.get(i+1));
 	    			tmpGroup2.add(pts.get(i+2));
     			}
+    			if(catmull) {
+	    			tmpGroup3.add(pts.get(i+1));
+	    			tmpGroup4.add(pts.get(i+2));
+    			}
     			secondGroup.add(pts.get(i+3));
     		}
     		
@@ -857,6 +865,12 @@ public class DemoXORPanel extends JPanel {
     			calculateCoeffs(tmpGroup, g, 1);
     			calculateCoeffs(tmpGroup2, g, 1);
     		}
+    		if(catmull) {
+    			g.setColor(Color.red);
+    			calculateCoeffs(tmpGroup3, g, 2);
+    			calculateCoeffs(tmpGroup4, g, 2);
+    		}
+    		
     		
     		g.setColor(Color.black);
 
@@ -916,14 +930,14 @@ public class DemoXORPanel extends JPanel {
             i++;
         }
         
-        if(bezierCurve&&curve!=1) {
+        if(bezierCurve&&curve!=1&&curve!=2) {
 	        for(i=0;i<x.length;i++) {
 	            cx[i]=bezierM[i][0]*x[0]+bezierM[i][1]*x[1]+bezierM[i][2]*x[2]+bezierM[i][3]*x[3];
 	            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
 	        }
 	        drawCurve(pts, cx, cy, 1000, g, 0);
         }
-        if(bspline) {
+        if(bspline&&curve!=2) {
 	        for(i=0;i<x.length;i++) {
 	            cx[i]=(int) (bSplineM[i][0]*x[0]+bSplineM[i][1]*x[1]+bSplineM[i][2]*x[2]+bSplineM[i][3]*x[3]);
 	            cy[i]=(int) (bSplineM[i][0]*y[0]+bSplineM[i][1]*y[1]+bSplineM[i][2]*y[2]+bSplineM[i][3]*y[3]);
