@@ -833,7 +833,7 @@ public class DemoXORPanel extends JPanel {
 		g.setColor(Color.black);
     	
     	if(nPoints == 4) {
-    		calculateCoeffs(pts, g);
+    		calculateCoeffs(pts, g, 0);
     	}
     	else if(nPoints == 7){
     		
@@ -849,15 +849,14 @@ public class DemoXORPanel extends JPanel {
     			secondGroup.add(pts.get(i+3));
     		}
     		
-    		calculateCoeffs(firstGroup, g);
-    		calculateCoeffs(secondGroup, g);
+    		calculateCoeffs(firstGroup, g, 0);
+    		calculateCoeffs(secondGroup, g, 0);
     		
     		if(bspline) {
     			g.setColor(Color.green);
-    			calculateCoeffs(tmpGroup, g);
-    			calculateCoeffs(tmpGroup2, g);
+    			calculateCoeffs(tmpGroup, g, 1);
+    			calculateCoeffs(tmpGroup2, g, 1);
     		}
-    		
     		
     		g.setColor(Color.black);
 
@@ -874,16 +873,16 @@ public class DemoXORPanel extends JPanel {
     			thirdGroup.add(pts.get(i+6));
     		}
     		
-    		calculateCoeffs(firstGroup, g);
+    		calculateCoeffs(firstGroup, g, 0);
     		g.setColor(Color.blue);
-    		calculateCoeffs(secondGroup, g);
+    		calculateCoeffs(secondGroup, g, 0);
     		g.setColor(Color.red);
-    		calculateCoeffs(thirdGroup, g);
+    		calculateCoeffs(thirdGroup, g, 0);
     		g.setColor(Color.black);
     	}
     }
 
-    public void calculateCoeffs(List<Point> pts, Graphics2D g) {
+    public void calculateCoeffs(List<Point> pts, Graphics2D g, int curve) {
             
         int[][] bezierM = 
             {	{-1,3,-3,1},
@@ -896,7 +895,6 @@ public class DemoXORPanel extends JPanel {
     			{0.5,-1,0.5,0},
     			{-0.5,0,0.5,0},
     			{0.1666,0.6666,0.1666,0},	};
-        
         
         double[][] catmullRomM =
         	{	{-0.5,1.5,-1.5,0.5},
@@ -918,7 +916,7 @@ public class DemoXORPanel extends JPanel {
             i++;
         }
         
-        if(bezierCurve) {
+        if(bezierCurve&&curve!=1) {
 	        for(i=0;i<x.length;i++) {
 	            cx[i]=bezierM[i][0]*x[0]+bezierM[i][1]*x[1]+bezierM[i][2]*x[2]+bezierM[i][3]*x[3];
 	            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
@@ -932,7 +930,7 @@ public class DemoXORPanel extends JPanel {
 	        }
 	        drawCurve(pts, cx, cy, 1000, g, 1);
         }
-        if(catmull) {
+        if(catmull&&curve!=1) {
 	        for(i=0;i<x.length;i++) {
 	            cx[i]=(int) (catmullRomM[i][0]*x[0]+catmullRomM[i][1]*x[1]+catmullRomM[i][2]*x[2]+catmullRomM[i][3]*x[3]);
 	            cy[i]=(int) (catmullRomM[i][0]*y[0]+catmullRomM[i][1]*y[1]+catmullRomM[i][2]*y[2]+catmullRomM[i][3]*y[3]);
