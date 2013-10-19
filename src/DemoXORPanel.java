@@ -906,21 +906,21 @@ public class DemoXORPanel extends JPanel {
 	            cx[i]=bezierM[i][0]*x[0]+bezierM[i][1]*x[1]+bezierM[i][2]*x[2]+bezierM[i][3]*x[3];
 	            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
 	        }
-	        drawCurve(pts, cx, cy, 1000, g);
+	        drawCurve(pts, cx, cy, 1000, g, 0);
         }
-        else if(bspline) {
+        if(bspline) {
 	        for(i=0;i<x.length;i++) {
 	            cx[i]=(int) (bSplineM[i][0]*x[0]+bSplineM[i][1]*x[1]+bSplineM[i][2]*x[2]+bSplineM[i][3]*x[3]);
 	            cy[i]=(int) (bSplineM[i][0]*y[0]+bSplineM[i][1]*y[1]+bSplineM[i][2]*y[2]+bSplineM[i][3]*y[3]);
 	        }
-	        drawCurve(pts, cx, cy, 1000, g);
+	        drawCurve(pts, cx, cy, 1000, g, 1);
         }
-        else if(catmull) {
+        if(catmull) {
 	        for(i=0;i<x.length;i++) {
 	            cx[i]=(int) (catmullRomM[i][0]*x[0]+catmullRomM[i][1]*x[1]+catmullRomM[i][2]*x[2]+catmullRomM[i][3]*x[3]);
 	            cy[i]=(int) (catmullRomM[i][0]*y[0]+catmullRomM[i][1]*y[1]+catmullRomM[i][2]*y[2]+catmullRomM[i][3]*y[3]);
 	        }
-	        drawCurve(pts, cx, cy, 1000, g);
+	        drawCurve(pts, cx, cy, 1000, g, 2);
         }
         
         System.out.println();
@@ -939,22 +939,29 @@ public class DemoXORPanel extends JPanel {
      * @param cy Coefficients for y(t): Cy=M*Gy
      * @param n Number of steps
      */
-    public void drawCurve(List<Point> pts, int[] cx, int[] cy, int n, Graphics2D g) {
+    public void drawCurve(List<Point> pts, int[] cx, int[] cy, int n, Graphics2D g, int curve) {
         g.setStroke(new BasicStroke(2));
         double t = 0;
         double delta = 1.0/n;
         double t2, t3;
         int x=0, y=0;
-        int prevx = pts.get(0).getX();
-        int prevy = pts.get(0).getY();
-        
+        int prevx = 0;
+        int prevy = 0;
+
         for(int i=0;i<n;i++) {  
             t+=delta;
             t2=t*t;
             t3=t2*t;
+            
 	        x=(int) (cx[0]*t3+cx[1]*t2+cx[2]*t+cx[3]);
 	        y=(int) (cy[0]*t3+cy[1]*t2+cy[2]*t+cy[3]);
-            g.drawLine(prevx, prevy, x, y);
+	        
+	        if(i == 0) {
+	        	prevx = x;
+	        	prevy = y;
+            }      
+	        
+	        g.drawLine(prevx, prevy, x, y);
             prevx=x;
             prevy=y;
         }
