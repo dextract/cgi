@@ -42,6 +42,8 @@ public class DemoXORFrame extends JFrame {
 		menu.add(criarItemMenuOpcoes("Polyline"));
 		menu.add(criarItemMenuOpcoes("Bounding box"));
 		menu.add(criarItemMenuOpcoes("Bezier curve"));
+		menu.add(criarItemMenuOpcoes("B-spline curve"));
+		menu.add(criarItemMenuOpcoes("Catmull-Rom curve"));
 		return menu;
 	}
 
@@ -86,6 +88,24 @@ public class DemoXORFrame extends JFrame {
 						item.setSelected(false);
 					
 					painel.changeOption(3);
+				}
+				else if(e.getActionCommand().equals("B-Spline curve")) {
+					
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);
+					
+					painel.changeOption(4);
+				}
+				else if(e.getActionCommand().equals("Catmull-Rom curve")) {
+					
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);
+					
+					painel.changeOption(5);
 				}
 			}	
 		}
