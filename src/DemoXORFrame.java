@@ -1,8 +1,4 @@
-import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -13,7 +9,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
-
 
 public class DemoXORFrame extends JFrame {
 
@@ -50,13 +45,18 @@ public class DemoXORFrame extends JFrame {
 	private JMenu criarMenuFicheiro() {
 		JMenu menu = new JMenu("File");
 		menu.add(criarItemMenuFicheiro("New"));
+		menu.add(criarItemMenuFicheiro("Print"));
 		menu.add(new JSeparator());
 		menu.add(criarItemMenuFicheiro("Exit"));
 		return menu;
 	}
 	
 	private JMenuItem criarItemMenuOpcoes(String texto) {
+		
 		final JCheckBoxMenuItem item = new JCheckBoxMenuItem(texto);
+		
+		if(texto.equals("Polyline"))
+			item.setSelected(true);
 
 		class ListenerItemMenu implements ActionListener
 		{
@@ -109,7 +109,6 @@ public class DemoXORFrame extends JFrame {
 				}
 			}	
 		}
-		
 		item.addActionListener(new ListenerItemMenu());
 		return item;	
 	}
@@ -124,6 +123,8 @@ public class DemoXORFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if(e.getActionCommand().equals("New"))
 					painel.limparDesenho();
+				else if(e.getActionCommand().equals("Print"))
+					painel.imprimir();
 				else if(e.getActionCommand().equals("Exit"))
 					System.exit(0);
 			}	

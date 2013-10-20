@@ -8,11 +8,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
-
 
 public class DemoXORPanel extends JPanel {
 
@@ -58,6 +61,14 @@ public class DemoXORPanel extends JPanel {
             	
             	if(boundingBox && points.size() == nPoints)
             		drawBoundingBox((Graphics2D) getGraphics());
+            	
+            	if(rubberBanding) {
+            		rubberBanding = false;
+            		repaint();
+            		imprimir();
+            		rubberBandingPoint = null;
+            		rubberBandingTmpPoint = null;
+            	}
             	
                 setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             }
@@ -116,7 +127,7 @@ public class DemoXORPanel extends JPanel {
             	    	drawCurves(points, g);
                 
                 }
-                else if(points.size()<nPoints-1){   // Estamos a iniciar uma linha
+                else if(polyline && points.size()<nPoints-1){   // Estamos a iniciar uma linha
                                                         
                     linhaPresa = true;
                     xPosInicial = xPosAnterior = xPos;
@@ -124,6 +135,9 @@ public class DemoXORPanel extends JPanel {
                     drawSquare(xPos, yPos, g);
                     points.add(new Point(xPosInicial, yPosInicial, false));
                 }
+                
+                if(rubberBanding)
+                	rubberBandingPoint = new Point(xPos, yPos, false);
             }                
         
         };
@@ -510,6 +524,10 @@ public class DemoXORPanel extends JPanel {
                 	}
                 	
                 }
+                if(rubberBanding&&rubberBandingPoint!=null) {
+                	rubberBandingTmpPoint = new Point(e.getX(), e.getY(), false);
+                	repaint();
+                }
             }
             
             public void mouseMoved(MouseEvent e) {
@@ -672,24 +690,34 @@ public class DemoXORPanel extends JPanel {
         Point sp;
         
         if(existeLinha) {
+        	
+        	g2.setStroke(new BasicStroke(1));
+        	
+        	if(polyline) {
+	            for(int i = 0; i < points.size() - 1; i++) {
+	                fp = points.get(i);
+	                sp = points.get(i+1);
+	                
+	                g2.setColor(Color.yellow);
+	                g2.drawLine(fp.getX(), fp.getY(), sp.getX(), sp.getY());
+	                g2.setColor(Color.black);
+	                
+	                drawSquare(fp.getX(), fp.getY(), g2);
+	                if(i==points.size()-2)
+	                        drawSquare(sp.getX(), sp.getY(), g2);        
+	            }
+        	}
+        	
         	if(boundingBox && points.size() == nPoints) 
                 drawBoundingBox(g2);
-        	g2.setStroke(new BasicStroke(1));
-            for(int i = 0; i < points.size() - 1; i++) {
-                fp = points.get(i);
-                sp = points.get(i+1);
-                
-                g2.setColor(Color.yellow);
-                g2.drawLine(fp.getX(), fp.getY(), sp.getX(), sp.getY());
-                g2.setColor(Color.black);
-                
-                drawSquare(fp.getX(), fp.getY(), g2);
-                if(i==points.size()-2)
-                        drawSquare(sp.getX(), sp.getY(), g2);        
-            }
-           
+        	
+            
             if(bezierCurve||bspline||catmull)
             	drawCurves(points, g2);
+	            
+            if(rubberBanding&&rubberBandingPoint!=null)
+            	drawRubberBanding(g2);
+
             
         }
 
@@ -707,7 +735,14 @@ public class DemoXORPanel extends JPanel {
     }
     
     public void drawSquare(int x, int y, Graphics2D g) {
-            g.drawRect(x - 5, y - 5, 10, 10);       
+            g.drawRect(x-5, y-5, 10, 10);       
+    }
+    
+    public void drawRubberBanding(Graphics2D g) {
+    	g.setColor(Color.black);
+    	g.drawRect(rubberBandingPoint.getX(), rubberBandingPoint.getY(),
+    			rubberBandingTmpPoint.getX()-rubberBandingPoint.getX(),
+    			rubberBandingTmpPoint.getY()-rubberBandingPoint.getY());
     }
     
     public List<Point> getPointsCopy(List<Point> ps) {
@@ -764,17 +799,19 @@ public class DemoXORPanel extends JPanel {
                 Point fp;
                 Point sp;
                 
-                for(int i = 0; i < points.size() - 1; i++) {
-                    fp = points.get(i);
-                    sp = points.get(i+1);
-                    
-                    g.setColor(Color.yellow);
-                    g.drawLine(fp.getX(), fp.getY(), sp.getX(), sp.getY());
-                    g.setColor(Color.black);
-                    
-                    drawSquare(fp.getX(), fp.getY(), g);
-                    if(i==points.size()-2)
-                            drawSquare(sp.getX(), sp.getY(), g);        
+                if(polyline) {
+	                for(int i = 0; i < points.size() - 1; i++) {
+	                    fp = points.get(i);
+	                    sp = points.get(i+1);
+	                    
+	                    g.setColor(Color.yellow);
+	                    g.drawLine(fp.getX(), fp.getY(), sp.getX(), sp.getY());
+	                    g.setColor(Color.black);
+	                    
+	                    drawSquare(fp.getX(), fp.getY(), g);
+	                    if(i==points.size()-2)
+	                            drawSquare(sp.getX(), sp.getY(), g);        
+	                }
                 }
                 
                 if(bezierCurve||bspline||catmull)
@@ -784,7 +821,6 @@ public class DemoXORPanel extends JPanel {
     }
     
     public void setPointNumber(int n) {
-        System.out.println(boundingBox);
         
         if(nPoints == n) {
         	System.out.println("JÃ¡ existem " + n + " pontos.");
@@ -810,16 +846,13 @@ public class DemoXORPanel extends JPanel {
 	    if(n==5)
 	    	catmull = (catmull) ? false : true;
 	    
-	    System.out.println(n+" selected");
-	    
 	    if(boundingBox && points.size() == nPoints)
 	    	drawBoundingBox(g);
 	    if( (bezierCurve||bspline||catmull) && points.size() == nPoints )
 	    	drawCurves(points, g);
-	    
+	   
 	    repaint();
     }
-    
     
     public void drawCurves(List<Point> pts, Graphics2D g) {
     	
@@ -971,7 +1004,7 @@ public class DemoXORPanel extends JPanel {
 	            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
 	        }
 	        g.setColor(Color.black);
-	        drawCurve(pts, cx, cy, 1000, g, 0);
+	        drawCurve(pts, cx, cy, 100, g, 0);
         }
         if(bspline&&curve!=2) {
 	        for(i=0;i<x.length;i++) {
@@ -982,7 +1015,7 @@ public class DemoXORPanel extends JPanel {
 	        	g.setColor(Color.blue);
 	        else if(curve==1)
 	        	g.setColor(Color.cyan);
-	        drawCurve(pts, cx, cy, 1000, g, 1);
+	        drawCurve(pts, cx, cy, 100, g, 1);
         }
         if(catmull&&curve!=1) {
 	        for(i=0;i<x.length;i++) {
@@ -993,7 +1026,7 @@ public class DemoXORPanel extends JPanel {
 	        	g.setColor(Color.red);
 	        else if(curve==2)
 	        	g.setColor(Color.pink);
-	        drawCurve(pts, cx, cy, 1000, g, 2);
+	        drawCurve(pts, cx, cy, 100, g, 2);
         }
         
      /*   System.out.println();
@@ -1040,6 +1073,72 @@ public class DemoXORPanel extends JPanel {
         }
     }
     
+	public void imprimir() {
+		/*
+		 * Dimensoes da folha pretendida: 21cm por 28cm
+		 * 21cm = 794px
+		 * 28cm = 1058px
+		 * 
+		 * Dimensoes da janela do programa: 800px por 600px
+		 * 
+		 * Utiliza-se o enquadramento visor<->janela
+		 * x' =  x * largura da Folha / largura da janela do programa
+		 * y' = -y * altura da Folha / altura da janela do programa + altura da folha
+		 * 
+		 */
+		if( (polyline||bezierCurve) && !points.isEmpty() ) {
+			if(rubberBandingTmpPoint==null)
+				rubberBanding = true;
+			else
+				try {
+					int difX = Math.abs(rubberBandingTmpPoint.getX() - rubberBandingPoint.getX());
+					int difY = Math.abs(rubberBandingTmpPoint.getY() - rubberBandingPoint.getY());
+					int lowX = Math.min(rubberBandingTmpPoint.getX(), rubberBandingPoint.getX());
+					int lowY = Math.min(rubberBandingTmpPoint.getY(), rubberBandingPoint.getY());
+					int highX = lowX + difX;
+					int highY = lowY + difY;
+					
+					BufferedWriter bw = new BufferedWriter(new FileWriter(new File("outpus.ps")));
+					StringBuilder sb = new StringBuilder();
+					sb.append("%!PS\n");
+					sb.append("/px {0.75 mul} def\n");
+					sb.append("/cm {28.35 mul} def\n");
+					sb.append((points.get(0).getX()-lowX)*794/difX+" px "+(-(points.get(0).getY()-lowY)*1058/difY+1058)+" px moveto\n");
+					sb.append("gsave\n");
+					for(int i=1; i<nPoints; i++)
+						sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px lineto\n");
+					sb.append("[ 0.2 cm 0.2 cm ] 0 setdash\n");
+					sb.append("0.02 cm setlinewidth\n");
+					sb.append("0.02 cm setlinewidth\n");
+					sb.append("1.0 0.0 0.0 setrgbcolor\n");
+					sb.append("stroke\n");
+					sb.append("grestore\n");
+					for(int i=1; i<nPoints; i++) {
+						sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px ");
+						if(i==3) {
+							sb.append("curveto\n");
+							sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px moveto\n");
+						}
+						if(i==6) {
+							sb.append("curveto\n");
+							sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px moveto\n");
+						}
+					}
+					sb.append("curveto\n");
+					sb.append("stroke\n");
+					sb.append("showpage");
+					bw.write(sb.toString());
+					bw.flush();
+					bw.close();
+					System.out.println("output.ps created");
+				}
+				catch (IOException e) { System.exit(1); }
+		}
+	}
+    
+	private Point rubberBandingPoint;
+	private Point rubberBandingTmpPoint;
+	private boolean rubberBanding = false;
     private boolean boundingBox = false;
     private boolean bezierCurve = false;
     private boolean bspline = false;
@@ -1064,4 +1163,5 @@ public class DemoXORPanel extends JPanel {
     private double cX;
 	private double cY;
 	private List<Point> op = new ArrayList<Point>();
+
 }
