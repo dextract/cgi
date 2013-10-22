@@ -136,7 +136,7 @@ public class DemoXORPanel extends JPanel {
                     points.add(new Point(xPosInicial, yPosInicial, false));
                 }
                 
-                if(rubberBanding)
+                if(rubberBanding && grabbedPoint==null && !editOn)
                 	rubberBandingPoint = new Point(xPos, yPos, false);
             }                
         
@@ -493,7 +493,7 @@ public class DemoXORPanel extends JPanel {
                 		default: break;
                 	}
                 } 
-                else if (rotate) { 	
+                else if(rotate && !exited) { 	
 
                 	double alpha;
                 	double beta;
@@ -524,7 +524,7 @@ public class DemoXORPanel extends JPanel {
                 	}
                 	
                 }
-                if(rubberBanding&&rubberBandingPoint!=null) {
+                if(rubberBanding && rubberBandingPoint!=null && !exited) {
                 	rubberBandingTmpPoint = new Point(e.getX(), e.getY(), false);
                 	repaint();
                 }
@@ -740,9 +740,22 @@ public class DemoXORPanel extends JPanel {
     
     public void drawRubberBanding(Graphics2D g) {
     	g.setColor(Color.black);
-    	g.drawRect(rubberBandingPoint.getX(), rubberBandingPoint.getY(),
-    			rubberBandingTmpPoint.getX()-rubberBandingPoint.getX(),
-    			rubberBandingTmpPoint.getY()-rubberBandingPoint.getY());
+    	if(rubberBandingTmpPoint.getX()>=rubberBandingPoint.getX()&&rubberBandingTmpPoint.getY()>=rubberBandingPoint.getY())
+    		g.drawRect(rubberBandingPoint.getX(), rubberBandingPoint.getY(),
+    				rubberBandingTmpPoint.getX()-rubberBandingPoint.getX(),
+    				rubberBandingTmpPoint.getY()-rubberBandingPoint.getY());
+    	else if(rubberBandingTmpPoint.getX()>=rubberBandingPoint.getX()&&rubberBandingTmpPoint.getY()<rubberBandingPoint.getY())
+    		g.drawRect(rubberBandingPoint.getX(), rubberBandingTmpPoint.getY(),
+    				rubberBandingTmpPoint.getX()-rubberBandingPoint.getX(),
+    				rubberBandingPoint.getY()-rubberBandingTmpPoint.getY());
+    	else if(rubberBandingTmpPoint.getX()<rubberBandingPoint.getX()&&rubberBandingTmpPoint.getY()>=rubberBandingPoint.getY())
+    		g.drawRect(rubberBandingTmpPoint.getX(), rubberBandingPoint.getY(),
+    				rubberBandingPoint.getX()-rubberBandingTmpPoint.getX(),
+    				rubberBandingTmpPoint.getY()-rubberBandingPoint.getY());
+    	else
+    		g.drawRect(rubberBandingTmpPoint.getX(), rubberBandingTmpPoint.getY(),
+    				rubberBandingPoint.getX()-rubberBandingTmpPoint.getX(),
+    				rubberBandingPoint.getY()-rubberBandingTmpPoint.getY());
     }
     
     public List<Point> getPointsCopy(List<Point> ps) {
@@ -1075,15 +1088,15 @@ public class DemoXORPanel extends JPanel {
     
 	public void imprimir() {
 		/*
-		 * Dimensoes da folha pretendida: 21cm por 28cm
-		 * 
-		 * 
-		 * Utiliza-se o enquadramento visor<->janela
-		 * x' =  x * largura da Folha / largura da janela do programa
-		 * y' = -y * altura da Folha / altura da janela do programa + altura da folha
-		 * 
+		 * Dimensoes da folha pretendida: 21 x 28 cm (A4)
+		 * O ficheiro PostScript fica gravado com o tipo de papel 'US Letter',
+		 * e este tem as dimensoes 8.50 x 11.00 inch -> 21.59 x 27.94 cm, 
+		 * resultando assim em nao preenchimento do espaco em largura todo.
+		 * Por isso observa-se cerca de 0.4 cm de margem branca do lado direito.
+		 * Mudar 21cm para 21.6cm resolve o problema, mas o enunciado exige a 
+		 * utilizacao de 21 x 28 cm.
 		 */
-		if( (polyline||bezierCurve) && !points.isEmpty() ) {
+		  if(!points.isEmpty()) {
 			if(rubberBandingTmpPoint==null)
 				rubberBanding = true;
 			else
@@ -1100,47 +1113,51 @@ public class DemoXORPanel extends JPanel {
 					
 					double ratioSelection = difX/difY;
 					double ratioOutput = 21.0/28;
-					double ratio;
+					double ratio;	
 					
 					if(ratioSelection>ratioOutput)
 						ratio = 21.0/difX;
 					else
 						ratio = 28.0/difY;
 					
-					System.out.println(lowX);
-					System.out.println(lowY);
-					
 					BufferedWriter bw = new BufferedWriter(new FileWriter(new File("outpus.ps")));
 					StringBuilder sb = new StringBuilder();
+					
 					sb.append("%!PS\n");
 					sb.append("/cm {28.35 mul} def\n");
-					sb.append( (points.get(0).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(0).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
-					sb.append("gsave\n");
-					for(int i=1; i<nPoints; i++)
-						sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm lineto\n" );
-					sb.append("[ 0.2 cm 0.2 cm ] 0 setdash\n");
-					sb.append("0.02 cm setlinewidth\n");
-					sb.append("0.02 cm setlinewidth\n");
-					sb.append("1.0 0.0 0.0 setrgbcolor\n");
-					sb.append("stroke\n");
-					sb.append("grestore\n");
-					for(int i=1; i<nPoints; i++) {
-						sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm " );
-						if( (i==3)&&((nPoints-i)>1) ) {
-							sb.append("curveto\n");
-							sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
+					if((polyline||bezierCurve)) {
+						sb.append( (points.get(0).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(0).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
+						sb.append("gsave\n");
+						for(int i=1; i<nPoints; i++)
+							sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm lineto\n" );
+						sb.append("[ 0.2 cm 0.2 cm ] 0 setdash\n");
+						sb.append("0.02 cm setlinewidth\n");
+						sb.append("0.02 cm setlinewidth\n");
+						sb.append("1.0 0.0 0.0 setrgbcolor\n");
+						sb.append("stroke\n");
+						sb.append("grestore\n");
+						for(int i=1; i<nPoints; i++) {
+							sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm " );
+							if( (i==3)&&((nPoints-i)>1) ) {
+								sb.append("curveto\n");
+								sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
+							}
+							if( (i==6)&&((nPoints-i)>1) ) {
+								sb.append("curveto\n");
+								sb.append( (lowX+points.get(i).getX()-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
+							}
 						}
-						if( (i==6)&&((nPoints-i)>1) ) {
-							sb.append("curveto\n");
-							sb.append( (lowX+points.get(i).getX()-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
-						}
+						sb.append("curveto\n");
+						sb.append("stroke\n");
 					}
-					sb.append("curveto\n");
-					sb.append("stroke\n");
+					// Se nao houver nem a linha guia nem a curva visivel, é desenhada apenas a fronteira.
+					sb.append(10.5+" cm "+14+" cm 1 0 360 arc closepath\n");
+					sb.append("0.2 cm setlinewidth\n");
 					sb.append((lowX-lowX-cX)*ratio+10.5 + " cm " + (-(lowY-lowY-cY)*ratio+14) + " cm moveto\n");
 					sb.append((highX-lowX-cX)*ratio+10.5 + " cm " + (-(lowY-lowY-cY)*ratio+14) + " cm lineto\n");
 					sb.append((highX-lowX-cX)*ratio+10.5 + " cm " + (-(highY-lowY-cY)*ratio+14) + " cm lineto\n");
 					sb.append((lowX-lowX-cX)*ratio+10.5 + " cm " + (-(highY-lowY-cY)*ratio+14) + " cm lineto\n");
+					sb.append((lowX-lowX-cX)*ratio+10.5 + " cm " + (-(lowY-lowY-cY)*ratio+14) + " cm lineto\n");
 					sb.append("stroke\n");
 					sb.append("showpage");
 					bw.write(sb.toString());
@@ -1148,7 +1165,10 @@ public class DemoXORPanel extends JPanel {
 					bw.close();
 					System.out.println("output.ps created");
 				}
-				catch (IOException e) { System.exit(1); }
+				catch (IOException e) { 
+					System.err.println("IOException");
+					System.exit(1);
+				}
 		}
 	}
     
