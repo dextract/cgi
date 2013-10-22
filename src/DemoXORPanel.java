@@ -1076,10 +1076,7 @@ public class DemoXORPanel extends JPanel {
 	public void imprimir() {
 		/*
 		 * Dimensoes da folha pretendida: 21cm por 28cm
-		 * 21cm = 794px
-		 * 28cm = 1058px
 		 * 
-		 * Dimensoes da janela do programa: 800px por 600px
 		 * 
 		 * Utiliza-se o enquadramento visor<->janela
 		 * x' =  x * largura da Folha / largura da janela do programa
@@ -1098,15 +1095,23 @@ public class DemoXORPanel extends JPanel {
 					int highX = lowX + difX;
 					int highY = lowY + difY;
 					
+					double ratioSelection = difX/difY;
+					double ratioOutput = 21.0/28;
+					double ratio;
+					
+					if(ratioSelection>ratioOutput)
+						ratio = 21.0/difX;
+					else
+						ratio = 28.0/difY;
+					
 					BufferedWriter bw = new BufferedWriter(new FileWriter(new File("outpus.ps")));
 					StringBuilder sb = new StringBuilder();
 					sb.append("%!PS\n");
-					sb.append("/px {0.75 mul} def\n");
 					sb.append("/cm {28.35 mul} def\n");
-					sb.append((points.get(0).getX()-lowX)*794/difX+" px "+(-(points.get(0).getY()-lowY)*1058/difY+1058)+" px moveto\n");
+					sb.append((points.get(0).getX()-(points.get(0).getX()-lowX))*ratio+(points.get(0).getX()-lowX)+" cm "+(-(points.get(0).getY()-(points.get(0).getY()-lowY))*ratio+points.get(0).getY()-lowY)+" cm moveto\n");
 					sb.append("gsave\n");
 					for(int i=1; i<nPoints; i++)
-						sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px lineto\n");
+						sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm lineto\n");
 					sb.append("[ 0.2 cm 0.2 cm ] 0 setdash\n");
 					sb.append("0.02 cm setlinewidth\n");
 					sb.append("0.02 cm setlinewidth\n");
@@ -1114,14 +1119,14 @@ public class DemoXORPanel extends JPanel {
 					sb.append("stroke\n");
 					sb.append("grestore\n");
 					for(int i=1; i<nPoints; i++) {
-						sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px ");
-						if(i==3) {
+						sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm ");
+						if( (i==3)&&((nPoints-i)>1) ) {
 							sb.append("curveto\n");
-							sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px moveto\n");
+							sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm moveto\n");
 						}
-						if(i==6) {
+						if( (i==6)&&((nPoints-i)>1) ) {
 							sb.append("curveto\n");
-							sb.append((points.get(i).getX()-lowX)*794/difX+" px "+(-(points.get(i).getY()-lowY)*1058/difY+1058)+" px moveto\n");
+							sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm moveto\n");
 						}
 					}
 					sb.append("curveto\n");
