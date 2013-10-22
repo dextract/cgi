@@ -83,9 +83,12 @@ public class DemoXORPanel extends JPanel {
                 int yPos = e.getY();
                 
                 //clicar numa vizinhanÃƒÂ§a de um ponto
-                for(Point p: points)
-                    if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5)
-                        grabbedPoint = p;
+                
+                if(polyline) {
+	                for(Point p: points)
+	                    if(Math.abs(xPos-p.getX())<=5 && Math.abs(yPos-p.getY())<=5)
+	                        grabbedPoint = p;
+                }
                 
                 if(grabbedPoint==null) {
 		            if(move == true) {
@@ -151,7 +154,7 @@ public class DemoXORPanel extends JPanel {
                 int x = e.getX();
                 int y = e.getY();
                 
-                if(grabbedPoint != null) { //se se estiver a pegar num ponto
+                if(grabbedPoint != null && polyline) { //se se estiver a pegar num ponto
                     if(!exited) {
                         grabbedPoint.setNewX(x);
                         grabbedPoint.setNewY(y);
@@ -546,7 +549,7 @@ public class DemoXORPanel extends JPanel {
                          setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                         }
                 	
-                    if(boundingBox&&!overPoint) {
+                    if((boundingBox&&!overPoint) || !polyline) {
                     	
                     	
                     	
