@@ -1095,6 +1095,9 @@ public class DemoXORPanel extends JPanel {
 					int highX = lowX + difX;
 					int highY = lowY + difY;
 					
+					int cX = difX/2;
+					int cY = difY/2;
+					
 					double ratioSelection = difX/difY;
 					double ratioOutput = 21.0/28;
 					double ratio;
@@ -1104,14 +1107,17 @@ public class DemoXORPanel extends JPanel {
 					else
 						ratio = 28.0/difY;
 					
+					System.out.println(lowX);
+					System.out.println(lowY);
+					
 					BufferedWriter bw = new BufferedWriter(new FileWriter(new File("outpus.ps")));
 					StringBuilder sb = new StringBuilder();
 					sb.append("%!PS\n");
 					sb.append("/cm {28.35 mul} def\n");
-					sb.append((points.get(0).getX()-(points.get(0).getX()-lowX))*ratio+(points.get(0).getX()-lowX)+" cm "+(-(points.get(0).getY()-(points.get(0).getY()-lowY))*ratio+points.get(0).getY()-lowY)+" cm moveto\n");
+					sb.append( (points.get(0).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(0).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
 					sb.append("gsave\n");
 					for(int i=1; i<nPoints; i++)
-						sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm lineto\n");
+						sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm lineto\n" );
 					sb.append("[ 0.2 cm 0.2 cm ] 0 setdash\n");
 					sb.append("0.02 cm setlinewidth\n");
 					sb.append("0.02 cm setlinewidth\n");
@@ -1119,17 +1125,22 @@ public class DemoXORPanel extends JPanel {
 					sb.append("stroke\n");
 					sb.append("grestore\n");
 					for(int i=1; i<nPoints; i++) {
-						sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm ");
+						sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm " );
 						if( (i==3)&&((nPoints-i)>1) ) {
 							sb.append("curveto\n");
-							sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm moveto\n");
+							sb.append( (points.get(i).getX()-lowX-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
 						}
 						if( (i==6)&&((nPoints-i)>1) ) {
 							sb.append("curveto\n");
-							sb.append((points.get(i).getX()-(points.get(i).getX()-lowX))*ratio+(points.get(i).getX()-lowX)+" cm "+(-(points.get(i).getY()-(points.get(i).getY()-lowY))*ratio+points.get(i).getY()-lowY)+" cm moveto\n");
+							sb.append( (lowX+points.get(i).getX()-cX)*ratio+10.5 + " cm " + (-(points.get(i).getY()-lowY-cY)*ratio+14) + " cm moveto\n" );
 						}
 					}
 					sb.append("curveto\n");
+					sb.append("stroke\n");
+					sb.append((lowX-lowX-cX)*ratio+10.5 + " cm " + (-(lowY-lowY-cY)*ratio+14) + " cm moveto\n");
+					sb.append((highX-lowX-cX)*ratio+10.5 + " cm " + (-(lowY-lowY-cY)*ratio+14) + " cm lineto\n");
+					sb.append((highX-lowX-cX)*ratio+10.5 + " cm " + (-(highY-lowY-cY)*ratio+14) + " cm lineto\n");
+					sb.append((lowX-lowX-cX)*ratio+10.5 + " cm " + (-(highY-lowY-cY)*ratio+14) + " cm lineto\n");
 					sb.append("stroke\n");
 					sb.append("showpage");
 					bw.write(sb.toString());
