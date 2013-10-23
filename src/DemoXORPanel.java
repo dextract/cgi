@@ -156,8 +156,68 @@ public class DemoXORPanel extends JPanel {
                 
                 if(grabbedPoint != null && polyline) { //se se estiver a pegar num ponto
                     if(!exited) {
-                        grabbedPoint.setNewX(x);
-                        grabbedPoint.setNewY(y);
+                    	grabbedPoint.setNewX(x);
+	                    grabbedPoint.setNewY(y);
+                    	if(continuityClass==1) {
+                    		Point pA;
+                    		Point pB;
+                    		Point pP;
+                    		double alpha;
+                    		double beta;
+                    		double theta;
+                    		double rB;
+                    		double dxA;
+                    		double dyA;
+                    		double dxB;
+                    		double dyB;
+                    		for(int i=0;i<nPoints;i++) {
+                				if((i==2||i==5)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                					pA=points.get(i);
+                					pP=points.get(i+1);
+                					pB=points.get(i+2);
+                					dxA=Math.abs(pA.getX()-pP.getX());
+                					dyA=Math.abs(pA.getY()-pP.getY());
+                					dxB=Math.abs(pB.getX()-pP.getX());
+                					dyB=Math.abs(pB.getY()-pP.getY());
+                					
+                					rB=Math.sqrt(dxB*dxB+dyB*dyB);
+                					
+                					alpha=Math.atan(dyA/dxA);
+                					beta=alpha+Math.PI;
+                					
+                					pB.setNewX((int) (pP.getX()+rB*Math.cos(beta)));
+                					pB.setNewY((int) (pP.getY()-rB*Math.sin(beta)));
+                				}
+                				else if((i==4||i==7)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                					pB=points.get(i);
+                					pP=points.get(i-1);
+                					pA=points.get(i-2);
+                				}
+                    		}
+                    		grabbedPoint.setNewX(x);
+    	                    grabbedPoint.setNewY(y);
+                    	}
+                    	else if(continuityClass==2) {
+                    		Point pA;
+                    		Point pB;
+                    		Point pP;
+                    		for(int i=0;i<nPoints;i++) {
+                				if((i==2||i==5)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                					pA=points.get(i);
+                					pP=points.get(i+1);
+                					pB=points.get(i+2);
+                					pB.setNewX(2*pP.getX()-pA.getX());
+                					pB.setNewY(2*pP.getY()-pA.getY());
+                				}
+                				else if((i==4||i==7)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                					pB=points.get(i);
+                					pP=points.get(i-1);
+                					pA=points.get(i-2);
+                					pA.setNewX(2*pP.getX()-pB.getX());
+                					pA.setNewY(2*pP.getY()-pB.getY());
+                				}
+                    		}
+                    	}
                     }
                     repaint();     
                 }
@@ -1020,7 +1080,7 @@ public class DemoXORPanel extends JPanel {
 	            cy[i]=bezierM[i][0]*y[0]+bezierM[i][1]*y[1]+bezierM[i][2]*y[2]+bezierM[i][3]*y[3];
 	        }
 	        g.setColor(Color.black);
-	        drawCurve(pts, cx, cy, 100, g, 0);
+	        drawCurve(pts, cx, cy, 1000, g, 0);
         }
         if(bspline&&curve!=2) {
 	        for(i=0;i<x.length;i++) {
@@ -1031,7 +1091,7 @@ public class DemoXORPanel extends JPanel {
 	        	g.setColor(Color.blue);
 	        else if(curve==1)
 	        	g.setColor(Color.cyan);
-	        drawCurve(pts, cx, cy, 100, g, 1);
+	        drawCurve(pts, cx, cy, 1000, g, 1);
         }
         if(catmull&&curve!=1) {
 	        for(i=0;i<x.length;i++) {
@@ -1042,7 +1102,7 @@ public class DemoXORPanel extends JPanel {
 	        	g.setColor(Color.red);
 	        else if(curve==2)
 	        	g.setColor(Color.pink);
-	        drawCurve(pts, cx, cy, 100, g, 2);
+	        drawCurve(pts, cx, cy, 1000, g, 2);
         }
         
      /*   System.out.println();
@@ -1173,8 +1233,33 @@ public class DemoXORPanel extends JPanel {
 					System.exit(1);
 				}
 		}
+		  
+		  
+		  
 	}
     
+	
+	public void setContinuity(int i) {
+		
+		switch(i) {
+			case 1: {	//C0G1
+				continuityClass = 1;
+				break;
+			}
+			case 2: {	//C1G1
+				continuityClass = 2;
+				break;
+			}
+			case 0:		//C0G0
+			default: {
+				continuityClass = 0;
+				break;
+			}
+		}
+		
+	}
+	
+	private int continuityClass;
 	private Point rubberBandingPoint;
 	private Point rubberBandingTmpPoint;
 	private boolean rubberBanding = false;

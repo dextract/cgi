@@ -21,6 +21,7 @@ public class DemoXORFrame extends JFrame {
 		barra.add(criarMenuFicheiro());
 		barra.add(criarMenuMenu1());
 		barra.add(criarMenuOpcoes());
+		barra.add(criarMenuContinuidades());
 		barra.add(criarMenuAjuda());
 		setJMenuBar(barra);
 		
@@ -29,6 +30,15 @@ public class DemoXORFrame extends JFrame {
 		painel.limparDesenho();
 		painel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 		setContentPane(painel);
+	}
+	
+	private JMenu criarMenuContinuidades() {
+		JMenu menu = new JMenu("Continuity Options");
+		menu.add(criarItemMenuContinuidades("None"));
+		menu.add(criarItemMenuContinuidades("C0G0"));
+		menu.add(criarItemMenuContinuidades("C0G1"));
+		menu.add(criarItemMenuContinuidades("C1G1"));
+		return menu;
 	}
 	
 	
@@ -49,6 +59,25 @@ public class DemoXORFrame extends JFrame {
 		menu.add(new JSeparator());
 		menu.add(criarItemMenuFicheiro("Exit"));
 		return menu;
+	}
+	
+	private JMenuItem criarItemMenuContinuidades(String texto) {
+		JMenuItem item = new JMenuItem(texto);
+		
+		class ListenerItemMenu implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e) {
+				if(e.getActionCommand().equals("C0G0"))
+					painel.setContinuity(0);
+				else if(e.getActionCommand().equals("C0G1"))
+					painel.setContinuity(1);
+				else if(e.getActionCommand().equals("C1G1"))
+					painel.setContinuity(2);
+			}	
+		}
+		
+		item.addActionListener(new ListenerItemMenu());
+		return item;	
 	}
 	
 	private JMenuItem criarItemMenuOpcoes(String texto) {
