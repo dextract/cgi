@@ -37,6 +37,7 @@ public class DemoXORPanel extends JPanel {
                     g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
                     g.setColor(g.getBackground());
                 }   
+
             }
                         
             public void mouseExited(MouseEvent e) {
@@ -48,8 +49,11 @@ public class DemoXORPanel extends JPanel {
                         g.setColor(Color.yellow);
                         g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
                         g.setColor(g.getBackground());
-                }           
+                }     
+                
+                
             }
+            
             
             public void mouseReleased(MouseEvent e) {
                 grabbedPoint = null;
@@ -128,6 +132,7 @@ public class DemoXORPanel extends JPanel {
                         drawBoundingBox(g);
             	    if( (bezierCurve||bspline||catmull) && points.size() == nPoints )
             	    	drawCurves(points, g);
+            	    repaint();
                 
                 }
                 else if(polyline && points.size()<nPoints-1){   // Estamos a iniciar uma linha
@@ -249,329 +254,350 @@ public class DemoXORPanel extends JPanel {
                 	editStartPoint.setNewY(y);
                 }           
                 else if(resize && !exited) {
-                	switch(resizeSide) {
-                		case 0: { // Resize cima
-                			// Factor multiplicante com base no ponto com o maior y
-	            			double multFactor = boxYmax-y;
-	            			multFactor /= boxYmax-editStartPoint.getY();
-		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
-		                	// voltem aos sitios correctos
-	            			if(multFactor>=1) {
-			                	int sub = ((int)(boxYmax*multFactor)-boxYmax);
-		                		for(Point p: points) {
-		                    		p.setNewY((int)(p.getY()*multFactor-sub));	
-		                    		repaint();
-		                		}
-	            			}
-	            			else {
-	                			if(boxYmax-y>=10) {
-		            				int add = (boxYmax-(int)(boxYmax*multFactor));
-		            				for(Point p: points) {
-		            					p.setNewY((int)(p.getY()*multFactor)+add);
-			                    		repaint();
-			                		}
-	                			}
-	                			else break;
-	            			}
-	            			editStartPoint.setNewY(y);
-                			break;
+                	if(resizeType==0) {
+                		
+                		//cima/baixo
+                		if(resizeSide==0||resizeSide==4) {
+                			double multFactor = 300-y;
+                            multFactor /= 300-editStartPoint.getY();
+                            for(Point p: points) {
+                            	p.setNewX((int)((p.getX()-400)*multFactor)+400);    
+                            	p.setNewY((int)((p.getY()-300)*multFactor)+300);      
+                            	repaint();
+                            }
                 		}
-                		case 1: { // Resize cima-direita
-                			double multFactorX = x-boxXmin;
-                			double multFactorY = boxYmax-y;
-		                	multFactorX /= editStartPoint.getX()-boxXmin;
-                			multFactorY /= boxYmax-editStartPoint.getY();
-                			if(multFactorX>=1 && multFactorY>=1) {
-                				int subX = ((int)(boxXmin*multFactorX)-boxXmin);
-                				int subY = ((int)(boxYmax*multFactorY)-boxYmax);
-		                		for(Point p: points) {
-		                    		p.setNewX((int)(p.getX()*multFactorX-subX));	
-		                    		p.setNewY((int)(p.getY()*multFactorY-subY));
-		                    		repaint();
-		                		}
-                			}
-                			else if(multFactorX>=1 && multFactorY<1) {
-                				if(boxYmax-y>=10) {
-		            				int subX = ((int)(boxXmin*multFactorX)-boxXmin);
-		            				int addY = (boxYmax-(int)(boxYmax*multFactorY));
-		            				for(Point p: points) {
-			                    		p.setNewX((int)(p.getX()*multFactorX-subX));	
-			                    		p.setNewY((int)(p.getY()*multFactorY)+addY);
+                		//esquerda/direita
+                		else if(resizeSide==2||resizeSide==6) {
+                			
+                		}
+                		editStartPoint.setNewX(x);
+                    	editStartPoint.setNewY(y);
+                	}
+                	else if(resizeType==1) {
+	                	switch(resizeSide) {
+	                		case 0: { // Resize cima
+	                			// Factor multiplicante com base no ponto com o maior y
+		            			double multFactor = boxYmax-y;
+		            			multFactor /= boxYmax-editStartPoint.getY();
+			                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+			                	// voltem aos sitios correctos
+		            			if(multFactor>=1) {
+				                	int sub = ((int)(boxYmax*multFactor)-boxYmax);
+			                		for(Point p: points) {
+			                    		p.setNewY((int)(p.getY()*multFactor-sub));	
 			                    		repaint();
 			                		}
-                				}
-                				else break;
-                			}
-                			else if(multFactorX<1 && multFactorY>=1) {
-                				if(x-boxXmin>=10) {
-	                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
+		            			}
+		            			else {
+		                			if(boxYmax-y>=10) {
+			            				int add = (boxYmax-(int)(boxYmax*multFactor));
+			            				for(Point p: points) {
+			            					p.setNewY((int)(p.getY()*multFactor)+add);
+				                    		repaint();
+				                		}
+		                			}
+		                			else break;
+		            			}
+		            			editStartPoint.setNewY(y);
+	                			break;
+	                		}
+	                		case 1: { // Resize cima-direita
+	                			double multFactorX = x-boxXmin;
+	                			double multFactorY = boxYmax-y;
+			                	multFactorX /= editStartPoint.getX()-boxXmin;
+	                			multFactorY /= boxYmax-editStartPoint.getY();
+	                			if(multFactorX>=1 && multFactorY>=1) {
+	                				int subX = ((int)(boxXmin*multFactorX)-boxXmin);
 	                				int subY = ((int)(boxYmax*multFactorY)-boxYmax);
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+			                		for(Point p: points) {
+			                    		p.setNewX((int)(p.getX()*multFactorX-subX));	
 			                    		p.setNewY((int)(p.getY()*multFactorY-subY));
 			                    		repaint();
 			                		}
-                				}
-                				else break;
-                			}
-                			else {
-                				if((boxYmax-y>=20)&&(x-boxXmin>=20)) {
-	                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
-	                				int addY = (boxYmax-(int)(boxYmax*multFactorY));
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
-	                					p.setNewY((int)(p.getY()*multFactorY)+addY);
-			                    		repaint();
-			                		}
-                				}
-                				else break;
-                			}
-                			editStartPoint.setNewX(x);
-                        	editStartPoint.setNewY(y);
-                		}
-                		case 2: { // Resize direita
-                			// Factor multiplicante com base no ponto com o menor x
-		                	double multFactor = x-boxXmin;
-		                	multFactor /= editStartPoint.getX()-boxXmin;
-		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
-		                	// voltem aos sitios correctos
-		                	if(multFactor>=1) {
-			                	int sub = ((int)(boxXmin*multFactor)-boxXmin);
-		                		for(Point p: points) {
-		                    		p.setNewX((int)(p.getX()*multFactor-sub));	
-		                    		repaint();
-		                		}
-		                	}
-		                	else {
-		                		if(x-boxXmin>=10) {
-			                		int add = (boxXmin-(int)(boxXmin*multFactor));
+	                			}
+	                			else if(multFactorX>=1 && multFactorY<1) {
+	                				if(boxYmax-y>=10) {
+			            				int subX = ((int)(boxXmin*multFactorX)-boxXmin);
+			            				int addY = (boxYmax-(int)(boxYmax*multFactorY));
+			            				for(Point p: points) {
+				                    		p.setNewX((int)(p.getX()*multFactorX-subX));	
+				                    		p.setNewY((int)(p.getY()*multFactorY)+addY);
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else if(multFactorX<1 && multFactorY>=1) {
+	                				if(x-boxXmin>=10) {
+		                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
+		                				int subY = ((int)(boxYmax*multFactorY)-boxYmax);
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+				                    		p.setNewY((int)(p.getY()*multFactorY-subY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else {
+	                				if((boxYmax-y>=20)&&(x-boxXmin>=20)) {
+		                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
+		                				int addY = (boxYmax-(int)(boxYmax*multFactorY));
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+		                					p.setNewY((int)(p.getY()*multFactorY)+addY);
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			editStartPoint.setNewX(x);
+	                        	editStartPoint.setNewY(y);
+	                		}
+	                		case 2: { // Resize direita
+	                			// Factor multiplicante com base no ponto com o menor x
+			                	double multFactor = x-boxXmin;
+			                	multFactor /= editStartPoint.getX()-boxXmin;
+			                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+			                	// voltem aos sitios correctos
+			                	if(multFactor>=1) {
+				                	int sub = ((int)(boxXmin*multFactor)-boxXmin);
 			                		for(Point p: points) {
-			                    		p.setNewX((int)(p.getX()*multFactor+add));	
+			                    		p.setNewX((int)(p.getX()*multFactor-sub));	
 			                    		repaint();
 			                		}
-		                		}
-		                		else break;
-		                	}
-		                	editStartPoint.setNewX(x);
-		                	break;
-                		}
-                		case 3: { // Resize direita-baixo
-                			double multFactorX = x-boxXmin;
-                			double multFactorY = y-boxYmin;
-                			multFactorX /= editStartPoint.getX()-boxXmin;
-		                	multFactorY /= editStartPoint.getY()-boxYmin;
-		                	
-		                	if(multFactorX>=1 && multFactorY>=1) {
-		                		int subX = ((int)(boxXmin*multFactorX)-boxXmin);
-		                		int subY = ((int)(boxYmin*multFactorY)-boxYmin);
-		                		for(Point p: points) {
-		                			p.setNewX((int)(p.getX()*multFactorX-subX));	
-		                			p.setNewY((int)(p.getY()*multFactorY-subY));
-		                    		repaint();
-		                		}
-                			}
-                			else if(multFactorX>=1 && multFactorY<1) {
-                				if(y-boxYmin>=10) {
-	                				int subX = ((int)(boxXmin*multFactorX)-boxXmin);
-	                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX-subX));	
-	                					p.setNewY((int)(p.getY()*multFactorY+addY));
-			                    		repaint();
+			                	}
+			                	else {
+			                		if(x-boxXmin>=10) {
+				                		int add = (boxXmin-(int)(boxXmin*multFactor));
+				                		for(Point p: points) {
+				                    		p.setNewX((int)(p.getX()*multFactor+add));	
+				                    		repaint();
+				                		}
 			                		}
-                				}
-                				else break;
-                			}
-                			else if(multFactorX<1 && multFactorY>=1) {
-                				if(x-boxXmin>=10) {
-	                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
-	                				int subY = ((int)(boxYmin*multFactorY)-boxYmin);
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
-	                					p.setNewY((int)(p.getY()*multFactorY-subY));
-			                    		repaint();
-			                		}
-                				}
-                				else break;
-                			}
-                			else {
-                				if((x-boxXmin>=20)&&(y-boxYmin>=20)) {
-	                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
-	                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
-	                					p.setNewY((int)(p.getY()*multFactorY+addY));
-			                    		repaint();
-			                		}
-                				}
-                				else break;
-                			}
-		                	editStartPoint.setNewX(x);
-                        	editStartPoint.setNewY(y);
-                		}
-                		case 4: { // Resize baixo
-                			// Factor multiplicante com base no ponto com o menor y
-		                	double multFactor = y-boxYmin;
-		                	multFactor /= editStartPoint.getY()-boxYmin;
-		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
-		                	// voltem aos sitios correctos
-		                	if(multFactor>=1) {
-			                	int sub = ((int)(boxYmin*multFactor)-boxYmin);
-		                		for(Point p: points) {
-		                    		p.setNewY((int)(p.getY()*multFactor-sub));	
-		                    		repaint();
-		                		}
-		                	}
-		                	else {
-		                		if(y-boxYmin>=10) {
-			                		int add = (boxYmin-(int)(boxYmin*multFactor));
+			                		else break;
+			                	}
+			                	editStartPoint.setNewX(x);
+			                	break;
+	                		}
+	                		case 3: { // Resize direita-baixo
+	                			double multFactorX = x-boxXmin;
+	                			double multFactorY = y-boxYmin;
+	                			multFactorX /= editStartPoint.getX()-boxXmin;
+			                	multFactorY /= editStartPoint.getY()-boxYmin;
+			                	
+			                	if(multFactorX>=1 && multFactorY>=1) {
+			                		int subX = ((int)(boxXmin*multFactorX)-boxXmin);
+			                		int subY = ((int)(boxYmin*multFactorY)-boxYmin);
 			                		for(Point p: points) {
-			                    		p.setNewY((int)(p.getY()*multFactor+add));	
+			                			p.setNewX((int)(p.getX()*multFactorX-subX));	
+			                			p.setNewY((int)(p.getY()*multFactorY-subY));
 			                    		repaint();
 			                		}
-		                		}
-		                		else break;
-		                	}
-		                	editStartPoint.setNewY(y);
-		                	break;
-                		}
-                		case 5: { // Resize baixo-esquerda
-                			double multFactorX = boxXmax-x;
-                			double multFactorY = y-boxYmin;
-                			multFactorX /= boxXmax-editStartPoint.getX();
-		                	multFactorY /= editStartPoint.getY()-boxYmin;
-		                	
-		                	if(multFactorX>=1 && multFactorY>=1) {
-		                		int subX = ((int)(boxXmax*multFactorX)-boxXmax);
-		                		int subY = ((int)(boxYmin*multFactorY)-boxYmin);
-		                		for(Point p: points) {
-		                			p.setNewX((int)(p.getX()*multFactorX-subX));	
-		                			p.setNewY((int)(p.getY()*multFactorY-subY));
-		                    		repaint();
-		                		}
-                			}
-                			else if(multFactorX>=1 && multFactorY<1) {
-                				if(y-boxYmin>=10) {
-	                				int subX = ((int)(boxXmax*multFactorX)-boxXmax);
-	                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX-subX));	
-	                					p.setNewY((int)(p.getY()*multFactorY+addY));
-			                    		repaint();
-			                		}
-                				}
-                				else break;
-                			}
-                			else if(multFactorX<1 && multFactorY>=1) {
-                				if(boxXmax-x>=10) {
-	                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
-	                				int subY = ((int)(boxYmin*multFactorY)-boxYmin);
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
-	                					p.setNewY((int)(p.getY()*multFactorY-subY));
-			                    		repaint();
-			                		}
-                				}
-                				else break;
-                			}
-                			else {
-                				if((y-boxYmin>=20)&&(boxXmax-x>=20)) {
-	                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
-	                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
-	                					p.setNewY((int)(p.getY()*multFactorY+addY));
-			                    		repaint();
-			                		}
-                				}
-                				else break;
-                			}
-		                	editStartPoint.setNewX(x);
-                        	editStartPoint.setNewY(y);
-                        	break;
-                		}
-                		case 6: { // Resize esquerda
-                			// Factor multiplicante com base no ponto com o maior x
-		                	double multFactor = boxXmax-x;
-		                	multFactor /= boxXmax-editStartPoint.getX();
-		                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
-		                	// voltem aos sitios correctos
-		                	if(multFactor>=1) {
-			                	int sub = ((int)(boxXmax*multFactor)-boxXmax);
-		                		for(Point p: points) {
-		                    		p.setNewX((int)(p.getX()*multFactor-sub));	
-		                    		repaint();
-		                		}
-		                	}
-		                	else {
-		                		if(boxXmax-x>=10) {
-			                		int add = (boxXmax-(int)(boxXmax*multFactor));
+	                			}
+	                			else if(multFactorX>=1 && multFactorY<1) {
+	                				if(y-boxYmin>=10) {
+		                				int subX = ((int)(boxXmin*multFactorX)-boxXmin);
+		                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX-subX));	
+		                					p.setNewY((int)(p.getY()*multFactorY+addY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else if(multFactorX<1 && multFactorY>=1) {
+	                				if(x-boxXmin>=10) {
+		                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
+		                				int subY = ((int)(boxYmin*multFactorY)-boxYmin);
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+		                					p.setNewY((int)(p.getY()*multFactorY-subY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else {
+	                				if((x-boxXmin>=20)&&(y-boxYmin>=20)) {
+		                				int addX = (boxXmin-(int)(boxXmin*multFactorX));
+		                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+		                					p.setNewY((int)(p.getY()*multFactorY+addY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+			                	editStartPoint.setNewX(x);
+	                        	editStartPoint.setNewY(y);
+	                		}
+	                		case 4: { // Resize baixo
+	                			// Factor multiplicante com base no ponto com o menor y
+			                	double multFactor = y-boxYmin;
+			                	multFactor /= editStartPoint.getY()-boxYmin;
+			                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+			                	// voltem aos sitios correctos
+			                	if(multFactor>=1) {
+				                	int sub = ((int)(boxYmin*multFactor)-boxYmin);
 			                		for(Point p: points) {
-			                    		p.setNewX((int)(p.getX()*multFactor+add));	
-			                    		repaint();
-			                		}			                	
-		                		}
-		                		else break;
-		                	}
-		                	editStartPoint.setNewX(x);
-		                	break;
-                		}
-                		case 7: { // Resize esquerda-cima
-                			double multFactorX = boxXmax-x;
-                			double multFactorY = boxYmax-y;
-                			multFactorX /= boxXmax-editStartPoint.getX();
-                			multFactorY /= boxYmax-editStartPoint.getY();
-		                	
-		                	if(multFactorX>=1 && multFactorY>=1) {
-		                		int subX = ((int)(boxXmax*multFactorX)-boxXmax);
-		                		int subY = ((int)(boxYmax*multFactorY)-boxYmax);
-		                		for(Point p: points) {
-		                			p.setNewX((int)(p.getX()*multFactorX-subX));	
-		                			p.setNewY((int)(p.getY()*multFactorY-subY));
-		                    		repaint();
-		                		}
-                			}
-                			else if(multFactorX>=1 && multFactorY<1) {
-                				if(boxYmax-y>=10) {
-	                				int subX = ((int)(boxXmax*multFactorX)-boxXmax);
-	                				int addY = (boxYmax-(int)(boxYmax*multFactorY));
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX-subX));	
-	                					p.setNewY((int)(p.getY()*multFactorY)+addY);
+			                    		p.setNewY((int)(p.getY()*multFactor-sub));	
 			                    		repaint();
 			                		}
-                				}
-                				else break;
-                			}
-                			else if(multFactorX<1 && multFactorY>=1) {
-                				if(boxXmax-x>=10) {
-	                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
-	                				int subY = ((int)(boxYmax*multFactorY)-boxYmax);
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
-	                					p.setNewY((int)(p.getY()*multFactorY-subY));
+			                	}
+			                	else {
+			                		if(y-boxYmin>=10) {
+				                		int add = (boxYmin-(int)(boxYmin*multFactor));
+				                		for(Point p: points) {
+				                    		p.setNewY((int)(p.getY()*multFactor+add));	
+				                    		repaint();
+				                		}
+			                		}
+			                		else break;
+			                	}
+			                	editStartPoint.setNewY(y);
+			                	break;
+	                		}
+	                		case 5: { // Resize baixo-esquerda
+	                			double multFactorX = boxXmax-x;
+	                			double multFactorY = y-boxYmin;
+	                			multFactorX /= boxXmax-editStartPoint.getX();
+			                	multFactorY /= editStartPoint.getY()-boxYmin;
+			                	
+			                	if(multFactorX>=1 && multFactorY>=1) {
+			                		int subX = ((int)(boxXmax*multFactorX)-boxXmax);
+			                		int subY = ((int)(boxYmin*multFactorY)-boxYmin);
+			                		for(Point p: points) {
+			                			p.setNewX((int)(p.getX()*multFactorX-subX));	
+			                			p.setNewY((int)(p.getY()*multFactorY-subY));
 			                    		repaint();
 			                		}
-                				}
-                				else break;
-                			}
-                			else {
-                				if((boxXmax-x>=20)&&(boxYmax-y>=20)) {
-	                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
-	                				int addY = (boxYmax-(int)(boxYmax*multFactorY));
-	                				for(Point p: points) {
-	                					p.setNewX((int)(p.getX()*multFactorX+addX));	
-	                					p.setNewY((int)(p.getY()*multFactorY)+addY);
+	                			}
+	                			else if(multFactorX>=1 && multFactorY<1) {
+	                				if(y-boxYmin>=10) {
+		                				int subX = ((int)(boxXmax*multFactorX)-boxXmax);
+		                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX-subX));	
+		                					p.setNewY((int)(p.getY()*multFactorY+addY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else if(multFactorX<1 && multFactorY>=1) {
+	                				if(boxXmax-x>=10) {
+		                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
+		                				int subY = ((int)(boxYmin*multFactorY)-boxYmin);
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+		                					p.setNewY((int)(p.getY()*multFactorY-subY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else {
+	                				if((y-boxYmin>=20)&&(boxXmax-x>=20)) {
+		                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
+		                				int addY = (boxYmin-(int)(boxYmin*multFactorY));
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+		                					p.setNewY((int)(p.getY()*multFactorY+addY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+			                	editStartPoint.setNewX(x);
+	                        	editStartPoint.setNewY(y);
+	                        	break;
+	                		}
+	                		case 6: { // Resize esquerda
+	                			// Factor multiplicante com base no ponto com o maior x
+			                	double multFactor = boxXmax-x;
+			                	multFactor /= boxXmax-editStartPoint.getX();
+			                	// Calculo do valor para substrair aos novos pontos de modo a que estes 
+			                	// voltem aos sitios correctos
+			                	if(multFactor>=1) {
+				                	int sub = ((int)(boxXmax*multFactor)-boxXmax);
+			                		for(Point p: points) {
+			                    		p.setNewX((int)(p.getX()*multFactor-sub));	
 			                    		repaint();
 			                		}
-                				}
-                				else break;
-                			}
-		                	editStartPoint.setNewX(x);
-                        	editStartPoint.setNewY(y);
-                        	break;
-                		}
-                		default: break;
+			                	}
+			                	else {
+			                		if(boxXmax-x>=10) {
+				                		int add = (boxXmax-(int)(boxXmax*multFactor));
+				                		for(Point p: points) {
+				                    		p.setNewX((int)(p.getX()*multFactor+add));	
+				                    		repaint();
+				                		}			                	
+			                		}
+			                		else break;
+			                	}
+			                	editStartPoint.setNewX(x);
+			                	break;
+	                		}
+	                		case 7: { // Resize esquerda-cima
+	                			double multFactorX = boxXmax-x;
+	                			double multFactorY = boxYmax-y;
+	                			multFactorX /= boxXmax-editStartPoint.getX();
+	                			multFactorY /= boxYmax-editStartPoint.getY();
+			                	
+			                	if(multFactorX>=1 && multFactorY>=1) {
+			                		int subX = ((int)(boxXmax*multFactorX)-boxXmax);
+			                		int subY = ((int)(boxYmax*multFactorY)-boxYmax);
+			                		for(Point p: points) {
+			                			p.setNewX((int)(p.getX()*multFactorX-subX));	
+			                			p.setNewY((int)(p.getY()*multFactorY-subY));
+			                    		repaint();
+			                		}
+	                			}
+	                			else if(multFactorX>=1 && multFactorY<1) {
+	                				if(boxYmax-y>=10) {
+		                				int subX = ((int)(boxXmax*multFactorX)-boxXmax);
+		                				int addY = (boxYmax-(int)(boxYmax*multFactorY));
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX-subX));	
+		                					p.setNewY((int)(p.getY()*multFactorY)+addY);
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else if(multFactorX<1 && multFactorY>=1) {
+	                				if(boxXmax-x>=10) {
+		                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
+		                				int subY = ((int)(boxYmax*multFactorY)-boxYmax);
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+		                					p.setNewY((int)(p.getY()*multFactorY-subY));
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+	                			else {
+	                				if((boxXmax-x>=20)&&(boxYmax-y>=20)) {
+		                				int addX = (boxXmax-(int)(boxXmax*multFactorX));
+		                				int addY = (boxYmax-(int)(boxYmax*multFactorY));
+		                				for(Point p: points) {
+		                					p.setNewX((int)(p.getX()*multFactorX+addX));	
+		                					p.setNewY((int)(p.getY()*multFactorY)+addY);
+				                    		repaint();
+				                		}
+	                				}
+	                				else break;
+	                			}
+			                	editStartPoint.setNewX(x);
+	                        	editStartPoint.setNewY(y);
+	                        	break;
+	                		}
+	                		default: break;
+	                	}
                 	}
                 } 
                 else if(rotate && !exited) { 	
@@ -627,7 +653,7 @@ public class DemoXORPanel extends JPanel {
                          setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                         }
                 	
-                    if((boundingBox&&!overPoint) || !polyline) {
+                    if((boundingBox&&!overPoint) || (!polyline&&boundingBox)) {
                     	
                     	
                     	
@@ -743,9 +769,16 @@ public class DemoXORPanel extends JPanel {
                 Graphics2D g = (Graphics2D) getGraphics();
                 g.setXORMode(getBackground());
                 
+                if(optionChanged) {
+				    g.setColor(Color.yellow);
+			        g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
+			        optionChanged=false;
+                }
+                
                 g.setColor(Color.yellow);
                 // Apagar a linha antiga
                 g.drawLine(xPosInicial, yPosInicial, xPosAnterior, yPosAnterior);
+                
                 //Desenha a linha nova
                 g.drawLine(xPosInicial, yPosInicial, xPos, yPos);
                 g.setColor(Color.black);
@@ -784,16 +817,16 @@ public class DemoXORPanel extends JPanel {
 	                g2.setColor(Color.black);
 	                
 	                drawSquare(fp.getX(), fp.getY(), g2);
-	                if(i==points.size()-2)
-	                        drawSquare(sp.getX(), sp.getY(), g2);        
+	                        
 	            }
+	            
+                drawSquare(points.get(points.size()-1).getX(),points.get(points.size()-1).getY(), g2);
         	}
         	
         	if(boundingBox && points.size() == nPoints) 
                 drawBoundingBox(g2);
         	
-            
-            if(bezierCurve||bspline||catmull)
+            if((bezierCurve||bspline||catmull) && points.size() == nPoints)
             	drawCurves(points, g2);
 	            
             if(rubberBanding&&rubberBandingPoint!=null)
@@ -908,7 +941,7 @@ public class DemoXORPanel extends JPanel {
 	                }
                 }
                 
-                if(bezierCurve||bspline||catmull)
+                if((bezierCurve||bspline||catmull) && points.size() == nPoints)
                 	drawCurves(points, g);
                 
         }
@@ -944,6 +977,8 @@ public class DemoXORPanel extends JPanel {
 	    	drawBoundingBox(g);
 	    if( (bezierCurve||bspline||catmull) && points.size() == nPoints )
 	    	drawCurves(points, g);
+	    
+	    optionChanged = (optionChanged) ? false : true;
 	   
 	    repaint();
     }
@@ -1263,6 +1298,17 @@ public class DemoXORPanel extends JPanel {
 		
 	}
 	
+    public void changed() {
+    	optionChanged = true;
+    	System.out.println("changed");
+    }
+    
+	public void setResize(int n) {
+		resizeType = n;
+	}
+	
+	private int resizeType = 0;
+	private boolean optionChanged = false;
 	private int continuityClass;
 	private Point rubberBandingPoint;
 	private Point rubberBandingTmpPoint;
@@ -1291,5 +1337,6 @@ public class DemoXORPanel extends JPanel {
     private double cX;
 	private double cY;
 	private List<Point> op = new ArrayList<Point>();
+
 
 }

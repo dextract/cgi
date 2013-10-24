@@ -20,6 +20,7 @@ public class DemoXORFrame extends JFrame {
 		JMenuBar barra = new JMenuBar();
 		barra.add(criarMenuFicheiro());
 		barra.add(criarMenuMenu1());
+		barra.add(criarMenuResize());
 		barra.add(criarMenuOpcoes());
 		barra.add(criarMenuContinuidades());
 		barra.add(criarMenuAjuda());
@@ -40,6 +41,12 @@ public class DemoXORFrame extends JFrame {
 		return menu;
 	}
 	
+	private JMenu criarMenuResize() {
+		JMenu menu = new JMenu("Resize Options");
+		menu.add(criarItemMenuResize("Resize uniforme"));
+		menu.add(criarItemMenuResize("Resize dinamico"));
+		return menu;
+	}
 	
 	private JMenu criarMenuOpcoes() {
 		JMenu menu = new JMenu("Visualization Options");
@@ -58,6 +65,23 @@ public class DemoXORFrame extends JFrame {
 		menu.add(new JSeparator());
 		menu.add(criarItemMenuFicheiro("Exit"));
 		return menu;
+	}
+	
+	private JMenuItem criarItemMenuResize(String texto) {
+		JMenuItem item = new JMenuItem(texto);
+		
+		class ListenerItemMenu implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e) {
+				if(e.getActionCommand().equals("Resize uniforme"))
+					painel.setResize(0);
+				else if(e.getActionCommand().equals("Resize dinamico"))
+					painel.setResize(1);
+			}	
+		}
+		
+		item.addActionListener(new ListenerItemMenu());
+		return item;	
 	}
 	
 	private JMenuItem criarItemMenuContinuidades(String texto) {
@@ -212,7 +236,7 @@ public class DemoXORFrame extends JFrame {
 			{
 				if(e.getActionCommand().equals("About"))
 					JOptionPane.showMessageDialog(null, 
-							"Trabalho PrÃ¡tico 1 \n - Vladislav Pinzhuro, 34224\n - JoÃ£o Costa, 41726");
+							"Trabalho PrÃƒÂ¡tico 1 \n - Vladislav Pinzhuro, 34224\n - JoÃƒÂ£o Costa, 41726");
 			}
 		}
 		
