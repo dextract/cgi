@@ -101,16 +101,20 @@ public class DemoXORPanel extends JPanel {
 		            }
 		            else if(resize == true) {
 		                System.out.println("resizing box");
+		                boxEdges[0] = boxXmax;
+		                boxEdges[1] = boxXmin;
+		                boxEdges[2] = boxYmax;
+		                boxEdges[3] = boxYmin;
 		                editOn=true;
 		            }
 		            else if(rotate == true) {
-		            	System.out.println("rotating box");
-		            	cX = (boxXmax + boxXmin) / 2;
-	                	cY = (boxYmax + boxYmin) / 2;
-	                	op = getPointsCopy(points);
+		            	System.out.println("rotating box");		          	                	
 		            	editOn=true;
 		            }
 	            	editStartPoint=new Point(xPos,yPos,false);
+	            	cX = (boxXmax + boxXmin) / 2;
+                	cY = (boxYmax + boxYmin) / 2;
+                	op = getPointsCopy(points);
                 }
                 
                 Graphics2D g = (Graphics2D) getGraphics();
@@ -256,22 +260,54 @@ public class DemoXORPanel extends JPanel {
                 else if(resize && !exited) {
                 	if(resizeType==0) {
                 		
-                		//cima/baixo
-                		if(resizeSide==0||resizeSide==4) {
-                			double multFactor = 300-y;
-                            multFactor /= 300-editStartPoint.getY();
-                            for(Point p: points) {
-                            	p.setNewX((int)((p.getX()-400)*multFactor)+400);    
-                            	p.setNewY((int)((p.getY()-300)*multFactor)+300);      
-                            	repaint();
-                            }
-                		}
-                		//esquerda/direita
-                		else if(resizeSide==2||resizeSide==6) {
-                			
-                		}
-                		editStartPoint.setNewX(x);
-                    	editStartPoint.setNewY(y);
+                		double multFactor = 0;               		
+               			
+            			/* boxEdges[0] = boxXmax;
+	                	   boxEdges[1] = boxXmin;
+	                	   boxEdges[2] = boxYmax;
+	                	   boxEdges[3] = boxYmin;*/   
+                		
+                		//* 0-N; 2-E; 4-S; 6-W
+                		switch(resizeSide) {
+                		
+	                		case 0:
+	                			if(y>boxEdges[2]) 
+	                				break;
+	                			
+	                			multFactor = (double)(y-boxEdges[2])/(boxEdges[3]-boxEdges[2]);
+	                			break;
+	                		case 2:
+	                			if(x<boxEdges[1]) 
+	                				break;
+	                			
+	                			multFactor = (double)(x-boxEdges[1])/(boxEdges[0]-boxEdges[1]);
+	                			break;
+	                		case 4:
+	                			if(y<boxEdges[3]) 
+	                				break;
+	                			
+	                			multFactor = (double)(y-boxEdges[3])/(boxEdges[2]-boxEdges[3]);
+	                			break;
+	                		case 6:
+	                			if(y>boxEdges[0]) 
+	                				break;
+	                			
+	                			multFactor = (double)(x-boxEdges[0])/(boxEdges[1]-boxEdges[0]);
+	                			break;
+            		}
+
+                		
+                		System.out.println(multFactor);
+            			int i = 0;             			
+                        for(Point p: points) {
+
+                    		p.setNewX((int) ((op.get(i).getX() - cX) * multFactor + cX));
+                    		p.setNewY((int) ((op.get(i).getY() - cY) * multFactor + cY));
+                    	   
+                        	i++;
+                        	repaint();
+                        }
+                		
                 	}
                 	else if(resizeType==1) {
 	                	switch(resizeSide) {
@@ -1334,6 +1370,7 @@ public class DemoXORPanel extends JPanel {
     private boolean resize = false;
     private boolean move = false;
     private boolean editOn = false;
+    private int[] boxEdges = new int[4];
     private double cX;
 	private double cY;
 	private List<Point> op = new ArrayList<Point>();
