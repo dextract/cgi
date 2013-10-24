@@ -34,7 +34,6 @@ public class DemoXORFrame extends JFrame {
 	
 	private JMenu criarMenuContinuidades() {
 		JMenu menu = new JMenu("Continuity Options");
-		menu.add(criarItemMenuContinuidades("None"));
 		menu.add(criarItemMenuContinuidades("C0G0"));
 		menu.add(criarItemMenuContinuidades("C0G1"));
 		menu.add(criarItemMenuContinuidades("C1G1"));

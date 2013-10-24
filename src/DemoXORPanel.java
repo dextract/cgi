@@ -164,52 +164,70 @@ public class DemoXORPanel extends JPanel {
                     		Point pP;
                     		double alpha;
                     		double beta;
-                    		double theta;
+                    		double rA;
                     		double rB;
                     		double dxA;
                     		double dyA;
                     		double dxB;
                     		double dyB;
                     		for(int i=0;i<nPoints;i++) {
-                				if((i==2||i==5)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                				if((i==2||(i==5&&nPoints==10))&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
                 					pA=points.get(i);
                 					pP=points.get(i+1);
                 					pB=points.get(i+2);
-                					dxA=Math.abs(pA.getX()-pP.getX());
-                					dyA=Math.abs(pA.getY()-pP.getY());
-                					dxB=Math.abs(pB.getX()-pP.getX());
-                					dyB=Math.abs(pB.getY()-pP.getY());
                 					
-                					rB=Math.sqrt(dxB*dxB+dyB*dyB);
-                					
+                					dxA=pA.getX()-pP.getX();
+                					dyA=pP.getY()-pA.getY();
+                					dxB=pB.getX()-pP.getX();
+                					dyB=pP.getY()-pB.getY();
+                					rB=Math.sqrt(Math.pow(dxB, 2)+Math.pow(dyB, 2));
                 					alpha=Math.atan(dyA/dxA);
+                					if(dxA<0)
+                						alpha+=Math.PI;
+                					else if(dxA>=0&&dyA<0)
+                						alpha+=Math.PI*2;
                 					beta=alpha+Math.PI;
                 					
-                					pB.setNewX((int) (pP.getX()+rB*Math.cos(beta)));
-                					pB.setNewY((int) (pP.getY()-rB*Math.sin(beta)));
+	                				pB.setNewX((int) (rB*Math.cos(beta)+pP.getX()+0.5));
+		                			pB.setNewY((int) (-rB*Math.sin(beta)+pP.getY()+0.5));
+                            		
                 				}
-                				else if((i==4||i==7)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                				else if((i==4||(i==7&&nPoints==10))&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
                 					pB=points.get(i);
                 					pP=points.get(i-1);
                 					pA=points.get(i-2);
+                					
+                					dxA=pA.getX()-pP.getX();
+                					dyA=pP.getY()-pA.getY();
+                					dxB=pB.getX()-pP.getX();
+                					dyB=pP.getY()-pB.getY();
+                					rA=Math.sqrt(Math.pow(dxA, 2)+Math.pow(dyA, 2));
+                					alpha=Math.atan(dyB/dxB);
+                					if(dxB<0)
+                						alpha+=Math.PI;
+                					else if(dxB>=0&&dyB<0)
+                						alpha+=Math.PI*2;
+                					beta=alpha+Math.PI;
+		
+	                				pA.setNewX((int) (rA*Math.cos(beta)+pP.getX()+0.5));
+		                			pA.setNewY((int) (-rA*Math.sin(beta)+pP.getY()+0.5));
+	                				
                 				}
                     		}
-                    		grabbedPoint.setNewX(x);
-    	                    grabbedPoint.setNewY(y);
                     	}
                     	else if(continuityClass==2) {
                     		Point pA;
                     		Point pB;
                     		Point pP;
                     		for(int i=0;i<nPoints;i++) {
-                				if((i==2||i==5)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                				if((i==2||(i==5&&nPoints==10))&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
                 					pA=points.get(i);
                 					pP=points.get(i+1);
                 					pB=points.get(i+2);
                 					pB.setNewX(2*pP.getX()-pA.getX());
                 					pB.setNewY(2*pP.getY()-pA.getY());
                 				}
-                				else if((i==4||i==7)&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
+                				else if((i==4||(i==7&&nPoints==10))&&grabbedPoint.getX()==points.get(i).getX()&&grabbedPoint.getY()==points.get(i).getY()) {
                 					pB=points.get(i);
                 					pP=points.get(i-1);
                 					pA=points.get(i-2);
@@ -1105,22 +1123,8 @@ public class DemoXORPanel extends JPanel {
 	        drawCurve(pts, cx, cy, 1000, g, 2);
         }
         
-     /*   System.out.println();
-        for(i=0;i<cx.length;i++) 
-                System.out.print(cx[i]+" ");
-        System.out.println();
-        for(i=0;i<cy.length;i++) 
-                System.out.print(cy[i]+" ");*/
-
-       
-        
     }         
         
-    /**
-     * @param cx Coefficients for x(t): Cx=M*Gx
-     * @param cy Coefficients for y(t): Cy=M*Gy
-     * @param n Number of steps
-     */
     public void drawCurve(List<Point> pts, int[] cx, int[] cy, int n, Graphics2D g, int curve) {
         g.setStroke(new BasicStroke(2));
         double t = 0;
