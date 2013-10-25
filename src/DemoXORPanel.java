@@ -178,7 +178,7 @@ public class DemoXORPanel extends JPanel {
 					if (!exited) {
 						grabbedPoint.setNewX(x);
 						grabbedPoint.setNewY(y);
-						if (continuityClass == 1) {
+						if (continuityClass == 1 && nPoints > 4) {
 							Point pA;
 							Point pB;
 							Point pP;
@@ -247,7 +247,7 @@ public class DemoXORPanel extends JPanel {
 
 								}
 							}
-						} else if (continuityClass == 2) {
+						} else if (continuityClass == 2 && nPoints > 4) {
 							Point pA;
 							Point pB;
 							Point pP;
