@@ -1034,10 +1034,10 @@ public class DemoXORPanel extends JPanel {
 		List<Point> secondGroup;
 		List<Point> thirdGroup;
 
-		List<Point> bezierGroup;
-		List<Point> bezierGroup1;
-		List<Point> bezierGroup2;
-		List<Point> bezierGroup3;
+		List<Point> bsplineGroup;
+		List<Point> bsplineGroup1;
+		List<Point> bsplineGroup2;
+		List<Point> bsplineGroup3;
 
 		List<Point> catmullGroup;
 		List<Point> catmullGroup1;
@@ -1051,8 +1051,8 @@ public class DemoXORPanel extends JPanel {
 			firstGroup = new ArrayList<Point>();
 			secondGroup = new ArrayList<Point>();
 
-			bezierGroup = new ArrayList<Point>();
-			bezierGroup1 = new ArrayList<Point>();
+			bsplineGroup = new ArrayList<Point>();
+			bsplineGroup1 = new ArrayList<Point>();
 
 			catmullGroup = new ArrayList<Point>();
 			catmullGroup1 = new ArrayList<Point>();
@@ -1060,8 +1060,8 @@ public class DemoXORPanel extends JPanel {
 			for (int i = 0; i < 4; i++) {
 				firstGroup.add(pts.get(i));
 				if (bspline) {
-					bezierGroup.add(pts.get(i + 1));
-					bezierGroup1.add(pts.get(i + 2));
+					bsplineGroup.add(pts.get(i + 1));
+					bsplineGroup1.add(pts.get(i + 2));
 				}
 				if (catmull) {
 					catmullGroup.add(pts.get(i + 1));
@@ -1070,12 +1070,15 @@ public class DemoXORPanel extends JPanel {
 				secondGroup.add(pts.get(i + 3));
 			}
 
+			g.setColor(Color.black);
 			calculateCoeffs(firstGroup, g, 0);
+			g.setColor(Color.gray);
 			calculateCoeffs(secondGroup, g, 0);
+			g.setColor(Color.black);
 
 			if (bspline) {
-				calculateCoeffs(bezierGroup, g, 1);
-				calculateCoeffs(bezierGroup1, g, 1);
+				calculateCoeffs(bsplineGroup, g, 1);
+				calculateCoeffs(bsplineGroup1, g, 1);
 			}
 			if (catmull) {
 				calculateCoeffs(catmullGroup, g, 2);
@@ -1088,10 +1091,10 @@ public class DemoXORPanel extends JPanel {
 			secondGroup = new ArrayList<Point>();
 			thirdGroup = new ArrayList<Point>();
 
-			bezierGroup = new ArrayList<Point>();
-			bezierGroup1 = new ArrayList<Point>();
-			bezierGroup2 = new ArrayList<Point>();
-			bezierGroup3 = new ArrayList<Point>();
+			bsplineGroup = new ArrayList<Point>();
+			bsplineGroup1 = new ArrayList<Point>();
+			bsplineGroup2 = new ArrayList<Point>();
+			bsplineGroup3 = new ArrayList<Point>();
 
 			catmullGroup = new ArrayList<Point>();
 			catmullGroup1 = new ArrayList<Point>();
@@ -1101,10 +1104,10 @@ public class DemoXORPanel extends JPanel {
 			for (int i = 0; i < 4; i++) {
 				firstGroup.add(pts.get(i));
 				if (bspline) {
-					bezierGroup.add(pts.get(i + 1));
-					bezierGroup1.add(pts.get(i + 2));
-					bezierGroup2.add(pts.get(i + 4));
-					bezierGroup3.add(pts.get(i + 5));
+					bsplineGroup.add(pts.get(i + 1));
+					bsplineGroup1.add(pts.get(i + 2));
+					bsplineGroup2.add(pts.get(i + 4));
+					bsplineGroup3.add(pts.get(i + 5));
 				}
 				if (catmull) {
 					catmullGroup.add(pts.get(i + 1));
@@ -1116,15 +1119,18 @@ public class DemoXORPanel extends JPanel {
 				thirdGroup.add(pts.get(i + 6));
 			}
 
+			g.setColor(Color.black);
 			calculateCoeffs(firstGroup, g, 0);
+			g.setColor(Color.gray);
 			calculateCoeffs(secondGroup, g, 0);
+			g.setColor(Color.black);
 			calculateCoeffs(thirdGroup, g, 0);
 
 			if (bspline) {
-				calculateCoeffs(bezierGroup, g, 1);
-				calculateCoeffs(bezierGroup1, g, 1);
-				calculateCoeffs(bezierGroup2, g, 1);
-				calculateCoeffs(bezierGroup3, g, 1);
+				calculateCoeffs(bsplineGroup, g, 1);
+				calculateCoeffs(bsplineGroup1, g, 1);
+				calculateCoeffs(bsplineGroup2, g, 1);
+				calculateCoeffs(bsplineGroup3, g, 1);
 			}
 			if (catmull) {
 				calculateCoeffs(catmullGroup, g, 2);
@@ -1169,7 +1175,7 @@ public class DemoXORPanel extends JPanel {
 				cy[i] = bezierM[i][0] * y[0] + bezierM[i][1] * y[1]
 						+ bezierM[i][2] * y[2] + bezierM[i][3] * y[3];
 			}
-			g.setColor(Color.black);
+			//g.setColor(Color.black);
 			drawCurve(pts, cx, cy, 1000, g, 0);
 		}
 		if (bspline && curve != 2) {
