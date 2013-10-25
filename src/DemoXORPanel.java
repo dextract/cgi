@@ -17,6 +17,10 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+/**
+ * @author Vladislav Pinzhuro, n. 34224
+ * @author Joao Costa, n. 41726
+ */
 public class DemoXORPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -1175,8 +1179,7 @@ public class DemoXORPanel extends JPanel {
 				cy[i] = bezierM[i][0] * y[0] + bezierM[i][1] * y[1]
 						+ bezierM[i][2] * y[2] + bezierM[i][3] * y[3];
 			}
-			//g.setColor(Color.black);
-			drawCurve(pts, cx, cy, 1000, g, 0);
+			drawCurve(pts, cx, cy, 200, g, 0);
 		}
 		if (bspline && curve != 2) {
 			for (i = 0; i < x.length; i++) {
@@ -1189,7 +1192,7 @@ public class DemoXORPanel extends JPanel {
 				g.setColor(Color.blue);
 			else if (curve == 1)
 				g.setColor(Color.cyan);
-			drawCurve(pts, cx, cy, 1000, g, 1);
+			drawCurve(pts, cx, cy, 200, g, 1);
 		}
 		if (catmull && curve != 1) {
 			for (i = 0; i < x.length; i++) {
@@ -1204,7 +1207,7 @@ public class DemoXORPanel extends JPanel {
 				g.setColor(Color.red);
 			else if (curve == 2)
 				g.setColor(Color.pink);
-			drawCurve(pts, cx, cy, 1000, g, 2);
+			drawCurve(pts, cx, cy, 200, g, 2);
 		}
 
 	}

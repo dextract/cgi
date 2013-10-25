@@ -10,6 +10,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 
+/**
+ * @author Vladislav Pinzhuro, n. 34224
+ * @author Joao Costa, n. 41726
+ */
 public class DemoXORFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
