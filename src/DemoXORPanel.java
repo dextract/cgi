@@ -92,7 +92,7 @@ public class DemoXORPanel extends JPanel {
 				int xPos = e.getX();
 				int yPos = e.getY();
 
-				// clicar numa vizinhanÃƒÂ§a de um ponto
+				// clicar numa vizinhanÃ§a de um ponto
 
 				if (polyline) {
 					for (Point p : points)
@@ -170,7 +170,7 @@ public class DemoXORPanel extends JPanel {
 
 			public void mouseDragged(MouseEvent e) {
 				if (points.size() < nPoints)
-					return; // ainda nÃƒÂ£o se finalizou a linha por isso nÃƒÂ£o
+					return; // ainda nÃ£o se finalizou a linha por isso nÃ£o
 							// deve poder arrastar pontos
 
 				// Obter a posicao actual do cursor
@@ -294,12 +294,6 @@ public class DemoXORPanel extends JPanel {
 
 						double multFactor = 0;
 
-						/*
-						 * boxEdges[0] = boxXmax; boxEdges[1] = boxXmin;
-						 * boxEdges[2] = boxYmax; boxEdges[3] = boxYmin;
-						 */
-
-						// * 0-N; 2-E; 4-S; 6-W
 						switch (resizeSide) {
 
 						case 0:
@@ -714,7 +708,7 @@ public class DemoXORPanel extends JPanel {
 				int yPos = e.getY();
 				boolean overPoint = false;
 
-				if (points.size() == nPoints) // linha jÃ¡ terminada
+				if (points.size() == nPoints) // linha já terminada
 
 					for (Point p : points)
 						if (Math.abs(xPos - p.getX()) <= 5
@@ -1000,7 +994,7 @@ public class DemoXORPanel extends JPanel {
 	public void setPointNumber(int n) {
 
 		if (nPoints == n) {
-			System.out.println("JÃ¡ existem " + n + " pontos.");
+			System.out.println("Já existem " + n + " pontos.");
 		} else {
 			nPoints = n;
 			limparDesenho();
@@ -1076,7 +1070,7 @@ public class DemoXORPanel extends JPanel {
 
 			g.setColor(Color.black);
 			calculateCoeffs(firstGroup, g, 0);
-			g.setColor(Color.gray);
+			g.setColor(Color.DARK_GRAY);
 			calculateCoeffs(secondGroup, g, 0);
 			g.setColor(Color.black);
 
@@ -1125,7 +1119,7 @@ public class DemoXORPanel extends JPanel {
 
 			g.setColor(Color.black);
 			calculateCoeffs(firstGroup, g, 0);
-			g.setColor(Color.gray);
+			g.setColor(Color.DARK_GRAY);
 			calculateCoeffs(secondGroup, g, 0);
 			g.setColor(Color.black);
 			calculateCoeffs(thirdGroup, g, 0);
@@ -1334,7 +1328,7 @@ public class DemoXORPanel extends JPanel {
 						sb.append("curveto\n");
 						sb.append("stroke\n");
 					}
-					// Se nao houver nem a linha guia nem a curva visivel, é
+					// Se nao houver nem a linha guia nem a curva visivel, �
 					// desenhada apenas a fronteira.
 					sb.append(10.5 + " cm " + 14
 							+ " cm 1 0 360 arc closepath\n");
