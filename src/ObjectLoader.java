@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
 
@@ -13,7 +14,11 @@ class ObjectLoader {
     private final static String OBJ_FACE = "f";
     
     private ArrayList<float[]> v = new ArrayList<float[]>();
-    private ArrayList<int[]> fv = new ArrayList<int[]>();
+    private ArrayList<float[]> vt = new ArrayList<float[]>();
+    private ArrayList<ArrayList<float[]>> f = new ArrayList<ArrayList<float[]>>();
+    
+    private float minx, miny, minz;
+    private float maxx, maxy, maxz;
 
     public ObjectLoader() {
         // ...
@@ -45,16 +50,42 @@ class ObjectLoader {
                 continue;
             }
             else if(tokens[0].equals(OBJ_VERTEX)) {
-            	float[] vertice = {	Float.parseFloat(tokens[1]),
-            						Float.parseFloat(tokens[2]),
-            						Float.parseFloat(tokens[3])	};
-            	v.add(vertice);
-                // parse vertex line
+            	
+            	float x = Float.parseFloat(tokens[1]);
+            	float y = Float.parseFloat(tokens[2]);
+            	float z = Float.parseFloat(tokens[3]);
+            	
+            	if(v.size()==0) {
+	            	minx=maxx=x;
+	            	miny=maxy=y;
+	            	minz=maxz=z;
+            	}
+            	
+            	if(x<minx)
+            		minx = x;
+            	if(x>maxx)
+            		maxx = x;
+            	
+            	if(y<miny)
+            		miny = y;
+            	if(y>maxy)
+            		maxy = y;
+            	
+            	if(z<minz)
+            		minz = z;
+            	if(z>maxz)
+            		maxz = z;
+            	
+            	float[] vline = {x, y, z};
+            	v.add(vline);
+            	
 			} else if(tokens[0].equals(OBJ_VERTEX_TEXTURE)) {
-				// parse texture coordinates
+				float[] vtline = {	Float.parseFloat(tokens[1]),
+									Float.parseFloat(tokens[2])	};
+				vt.add(vtline);
 			}
 			else if(tokens[0].equals(OBJ_FACE)) {
-				ProcessfData(line);
+				processf(line);
 			}
 
             lineCount++;
@@ -62,45 +93,75 @@ class ObjectLoader {
         bufferedReader.close();
 
         System.err.println("Loaded " + lineCount + " lines");
+        //printStruct();
 	}
 	
-	private void ProcessfData(String fread) {
+	private void processf(String fread) {
 		polyCount++;
 		String s[] = fread.split("\\s+");
-		if (fread.contains("//")) { //pattern is present if obj has only v and vn in face data
-		    for (int i = 1; i < s.length; i++) {
-		        s[i] = s[i].replaceAll("//", "/0/"); //insert a zero for missing vt data
-		    }
+		ArrayList<float[]> faces = new ArrayList<float[]>();
+		for(int i=1;i<s.length;i++) {
+			String[] s1 = s[i].split("/");
+			float[] fline = {	Float.parseFloat(s1[0]),
+								Float.parseFloat(s1[1])
+									};
+			faces.add(fline);
 		}
-		ProcessfIntData(s); //pass in face data
+		f.add(faces);
 	}
 	
-	private void ProcessfIntData(String sdata[]) {
-        int vdata[] = new int[sdata.length - 1];
-        int vtdata[] = new int[sdata.length - 1];
-        int vndata[] = new int[sdata.length - 1];
-        for (int loop = 1; loop < sdata.length; loop++) {
-            String s = sdata[loop];
-            String[] temp = s.split("/");
-            vdata[loop - 1] = Integer.valueOf(temp[0]);         //always add vertex indices
-            if (temp.length > 1) {                              //we have v and vt data
-                vtdata[loop - 1] = Integer.valueOf(temp[1]);    //add in vt indices
-            } else {
-                vtdata[loop - 1] = 0;                           //if no vt data is present fill in zeros
-            }
-            if (temp.length > 2) {                              //we have v, vt, and vn data
-                vndata[loop - 1] = Integer.valueOf(temp[2]);    //add in vn indices
-            } else {
-                vndata[loop - 1] = 0;                           //if no vn data is present fill in zeros
-            }
-        }
-        fv.add(vdata);
-        //ft.add(vtdata);
-        //fn.add(vndata);
-    }
 	
+	private void printStruct() {
+		Iterator<float[]> it = v.iterator();
+		while(it.hasNext()) {
+			float[] v = it.next();
+			System.out.println("x: "+v[0]+" y: "+v[1]+" z: "+v[2]);
+		}
+		it = vt.iterator();
+		while(it.hasNext()) {
+			float[] v = it.next();
+			System.out.println("u: "+v[0]+" v: "+v[1]);
+		}
+		Iterator<ArrayList<float[]>> it1 = f.iterator();
+		ArrayList<float[]> ff;
+		while(it1.hasNext()) {
+			System.out.print("f ");
+			ff = it1.next();
+			it = ff.iterator();
+			while(it.hasNext()) {
+				float[] p = it.next();
+				System.out.print(p[0]+"/"+p[1]+" ");
+				if(!it.hasNext())
+					System.out.println();
+			}
+		}
+		System.out.println(polyCount);
+		System.out.println(v.size());
+	}
 	
-    // member variables here...
+	public ArrayList<ArrayList<float[]>> getFaces() {
+		return f;
+	}
+	
+	public ArrayList<float[]> getVertices() {
+		return v;
+	}
+	
+	public float[] getMinVertices() {
+		float[] mins = new float[3];
+		mins[0] = minx;
+		mins[1] = miny;
+		mins[2] = minz;
+		return mins;
+	}
+
+	public float[] getMaxVertices() {
+		float[] maxes = new float[3];
+		maxes[0] = maxx;
+		maxes[1] = maxy;
+		maxes[2] = maxz;
+		return maxes;
+	}
 	 
 	 private int polyCount = 0;
 

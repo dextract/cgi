@@ -21,6 +21,8 @@ import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GL;
@@ -41,18 +43,26 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private float yAxis = 0.0f;
 	private float zAxis = 0.0f;
 	private float zoom = 1.0f;
+	private ArrayList<ArrayList<float[]>> faces;
+	private ArrayList<float[]> vertices;
+	private float[] minVertices;
+	private float[] maxVertices;
 
     private GLU glu = new GLU();
 	
     public void init(GLAutoDrawable gLDrawable) {
     	glDraw = gLDrawable;
-    /*	ObjectLoader ol = new ObjectLoader();
+    	ObjectLoader ol = new ObjectLoader();
     	try {
 			ol.load(new File("objects/archer.obj"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
+    	faces = ol.getFaces();
+    	vertices = ol.getVertices();
+    	minVertices = ol.getMinVertices();
+    	maxVertices = ol.getMaxVertices();
     	GL gl = gLDrawable.getGL();
     	gl.glEnable(GL.GL_DEPTH_TEST);
     	gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
@@ -69,29 +79,48 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          int height = gLDrawable.getHeight();
          int width = gLDrawable.getWidth();
          float aspect = (float)width / (float)height;
+         
+  		 float px = (minVertices[0] + maxVertices[0]) / 2.0f;
+  		 float py = (minVertices[1] + maxVertices[1]) / 2.0f;
+  		 float pz = (minVertices[2] + maxVertices[2]) / 2.0f;
+  		 float r = (float)Math.sqrt(Math.pow(maxVertices[0]-px,2)+Math.pow(maxVertices[1]-py,2)+Math.pow(maxVertices[2]-pz,2));
+  		 
+  		 float fDistance = (float)(r/Math.tan(Math.PI/6));
+  		 double dNear = fDistance - r;
+  		 double dFar = fDistance + r;
 
          gl.glMatrixMode(GL.GL_PROJECTION);
          gl.glLoadIdentity();
          
-         // if perspectiva
-         //glu.gluPerspective(20.0f, aspect, 2.0, 50.0);
-         
-          //if ortogonal
-          //frente default
+       
+         // ortogonal
+         // frente
          if (width <= height)
-             gl.glOrtho(-2.0*zoom, 2.0*zoom, -2.0/aspect*zoom, 2.0/aspect*zoom, -1.0, 1.0);
+        	 gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
          else
-            gl.glOrtho(-2.0*aspect*zoom, 2.0*aspect*zoom, -2.0*zoom, 2.0*zoom, -1.0, 1.0);
-         //if planta 
+        	 gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
+         // planta 
          //gl.glRotatef(90, 1.0f, 0.0f, 0.0f);
-         // if esquerda
+         // esquerda
          //gl.glRotatef(90, 0.0f, 1.0f, 0.0f);
-         // if direita
+         // direita
          //gl.glRotatef(-90, 0.0f, 1.0f, 0.0f);
          
          
+         // axonometrica
+         /*
+         double a = Math.PI/6;
+         double b = Math.PI/6;
+         double theta = (Math.atan(Math.sqrt(Math.tan(a)/Math.tan(b)))-Math.PI/2)*180/Math.PI;
+         double gamma = (Math.asin(Math.sqrt(Math.tan(a)*Math.tan(b))))*180/Math.PI; 
+
+         gl.glRotated(gamma, 1.0f, 0.0f, 0.0f);
+         gl.glRotated(theta, 0.0f, 1.0f, 0.0f);
+         */
          
-         // if obliqua
+         
+         // obliqua
+         /*
          double l = 0.5;
          double alpha = Math.PI/4;
          double[] m = {	1,0,-l*Math.cos(alpha),0,
@@ -99,7 +128,11 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         		 		0,0,0,0,
         		 		0,0,0,1	};
          gl.glMultTransposeMatrixd(m, 0);
+         */
          
+         
+         // perspectiva
+         //gl.glFrustum(-r, r, -r, r, dNear, dFar);
          
          
          gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -107,13 +140,39 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          
          
          // perspectiva
-        // glu.gluLookAt(0, 5, -25.0*-zoom, 0, 0, 0, 1, 1, 0);
+         //glu.gluLookAt(0.0f, 0.0f, fDistance*zoom, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
          
-         gl.glEnable(GL.GL_DEPTH_TEST);
-    	 gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
-    	 gl.glPolygonOffset(1.0f, 1.0f);
+         
+         Iterator<float[]> it;
+  		 Iterator<ArrayList<float[]>> it1 = faces.iterator();
+  		 
+  		 gl.glColor3f(0.5f, 0.5f, 0.5f);
+  		 // wireframe
+  		 gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
+  		 // fill
+  		 //gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
 
-         
+  		 
+  		 // center the model
+  		 gl.glTranslatef(-px, -py, -pz);
+  		
+		 while(it1.hasNext()) {
+			it = it1.next().iterator();
+			
+			gl.glBegin(GL.GL_POLYGON);
+			
+			while(it.hasNext()) {
+				float[] p = it.next();
+				float[] pts = vertices.get((int)p[0]-1);
+				gl.glVertex3f(pts[0],pts[1],pts[2]);
+			}
+			gl.glEnd();  
+
+		 }
+			gl.glFlush();
+			gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);    
+			
+         /*
          gl.glBegin(GL.GL_QUADS);            // Draw A Quad
          gl.glColor3f(0.0f, 1.0f, 0.0f);     // Set The Color To Green
          gl.glVertex3f(1.0f, 1.0f, -1.0f);   // Top Right Of The Quad (Top)
@@ -152,6 +211,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          gl.glVertex3f(1.0f, -1.0f, -1.0f);  // Bottom Right Of The Quad (Right)
          gl.glEnd();                         // Done Drawing The Quad
          gl.glFlush();
+         */
     }
 
     public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, 
@@ -288,10 +348,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 
 		}
-		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			yAxis -= 1.0f;
-	        rquad += 1.0f;
-	        reDesenhar();
+		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {;
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_UP) {
 			zoom -= 0.01f;
