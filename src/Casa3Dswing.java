@@ -54,7 +54,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     	glDraw = gLDrawable;
     	ObjectLoader ol = new ObjectLoader();
     	try {
-			ol.load(new File("objects/archer.obj"));
+			ol.load(new File("objects/chess-game.obj"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
