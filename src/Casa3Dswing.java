@@ -112,6 +112,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          gl.glEnable(GL.GL_DEPTH_TEST);
     	 gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
     	 gl.glPolygonOffset(1.0f, 1.0f);
+
          
          gl.glBegin(GL.GL_QUADS);            // Draw A Quad
          gl.glColor3f(0.0f, 1.0f, 0.0f);     // Set The Color To Green
@@ -152,7 +153,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          gl.glEnd();                         // Done Drawing The Quad
          gl.glFlush();
     }
-        
+
     public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, 
             int height) {
         final GL gl = gLDrawable.getGL();
@@ -285,7 +286,12 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			
+
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			yAxis -= 1.0f;
+	        rquad += 1.0f;
+	        reDesenhar();
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_UP) {
 			zoom -= 0.01f;
@@ -331,4 +337,3 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	
 	
 }
-
