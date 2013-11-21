@@ -1,5 +1,6 @@
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -15,12 +16,19 @@ import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+
 import java.awt.event.WindowAdapter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.IntBuffer;
+
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.glu.GLU;
+
+import com.sun.opengl.util.GLUT;
 
 /**
  * @author  M. Próspero
@@ -32,12 +40,21 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private float xAxis = 0.0f;
 	private float yAxis = 0.0f;
 	private float zAxis = 0.0f;
+	private float zoom = 1.0f;
 
     private GLU glu = new GLU();
 	
     public void init(GLAutoDrawable gLDrawable) {
     	glDraw = gLDrawable;
+    /*	ObjectLoader ol = new ObjectLoader();
+    	try {
+			ol.load(new File("objects/archer.obj"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
     	GL gl = gLDrawable.getGL();
+    	gl.glEnable(GL.GL_DEPTH_TEST);
     	gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     	glDraw.addKeyListener(this);
     	// Podem adicionar-se outros listeners aqui (e.g. os do rato)
@@ -45,11 +62,56 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     
     public void display(GLAutoDrawable gLDrawable) {
     	 final GL gl = gLDrawable.getGL();
+    	
          gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-        
+         
+         
+         int height = gLDrawable.getHeight();
+         int width = gLDrawable.getWidth();
+         float aspect = (float)width / (float)height;
+
+         gl.glMatrixMode(GL.GL_PROJECTION);
          gl.glLoadIdentity();
-         gl.glTranslatef(0.0f, 0.0f, -6.0f);
-         gl.glRotatef(rquad, xAxis, yAxis, zAxis);
+         
+         // if perspectiva
+         //glu.gluPerspective(20.0f, aspect, 2.0, 50.0);
+         
+          //if ortogonal
+          //frente default
+         if (width <= height)
+             gl.glOrtho(-2.0*zoom, 2.0*zoom, -2.0/aspect*zoom, 2.0/aspect*zoom, -1.0, 1.0);
+         else
+            gl.glOrtho(-2.0*aspect*zoom, 2.0*aspect*zoom, -2.0*zoom, 2.0*zoom, -1.0, 1.0);
+         //if planta 
+         //gl.glRotatef(90, 1.0f, 0.0f, 0.0f);
+         // if esquerda
+         //gl.glRotatef(90, 0.0f, 1.0f, 0.0f);
+         // if direita
+         //gl.glRotatef(-90, 0.0f, 1.0f, 0.0f);
+         
+         
+         
+         // if obliqua
+         double l = 0.5;
+         double alpha = Math.PI/4;
+         double[] m = {	1,0,-l*Math.cos(alpha),0,
+        		 		0,1,-l*Math.sin(alpha),0,
+        		 		0,0,0,0,
+        		 		0,0,0,1	};
+         gl.glMultTransposeMatrixd(m, 0);
+         
+         
+         
+         gl.glMatrixMode(GL.GL_MODELVIEW);
+         gl.glLoadIdentity();
+         
+         
+         // perspectiva
+        // glu.gluLookAt(0, 5, -25.0*-zoom, 0, 0, 0, 1, 1, 0);
+         
+         gl.glEnable(GL.GL_DEPTH_TEST);
+    	 gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
+    	 gl.glPolygonOffset(1.0f, 1.0f);
          
          gl.glBegin(GL.GL_QUADS);            // Draw A Quad
          gl.glColor3f(0.0f, 1.0f, 0.0f);     // Set The Color To Green
@@ -90,87 +152,14 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          gl.glEnd();                         // Done Drawing The Quad
          gl.glFlush();
     }
-    
-  /*  public void display(GLAutoDrawable gLDrawable) {
-      GL gl = gLDrawable.getGL();
-
-      gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-      gl.glMatrixMode(GL.GL_PROJECTION);
-      gl.glLoadIdentity();
-      gl.glOrtho(0.0, 400.0, -280.0, 0.0, -100.0, 100.0); // janela fixa
-      gl.glMatrixMode(GL.GL_MODELVIEW);
-      gl.glLoadIdentity();
-
-      double red = 0.0, green = 0.0, blue = 0.0;
-      if (vermelho.isSelected()) 
-    	  red = 1.0;
-      if (verde.isSelected()) 
-    	  green = 1.0;
-      if (azul.isSelected()) 
-    	  blue = 1.0;
-      
-      if (paredes.isSelected())
-    	  gl.glColor3d(red, green, blue);
-      else
-    	  gl.glColor3d(0.0, 0.0, 0.0);  // paredes:
-      	gl.glBegin(GL.GL_LINES);
-      	gl.glVertex2d(120.0,-220.0);   // z=0 para glVertex2d()
-      	gl.glVertex2d(120.0,-140.0);
-      	gl.glVertex2d(280.0,-220.0);
-      	gl.glVertex2d(280.0,-140.0);
-      gl.glEnd();
-
-      if (porta.isSelected())
-    	  gl.glColor3d(red, green, blue);
-      else
-    	  gl.glColor3d(0.0, 0.0, 1.0);  // porta:
-    	gl.glBegin(GL.GL_LINE_STRIP);
-    	gl.glVertex2d(140.0, -220.0);
-    	gl.glVertex2d(140.0, -160.0);
-    	gl.glVertex2d(180.0, -160.0);
-    	gl.glVertex2d(180.0, -220.0);
-      gl.glEnd();
-
-      if (janela.isSelected())
-    	  gl.glColor3d(red, green, blue);
-      else
-    	  gl.glColor3d(1.0, 0.0, 1.0);  // janela:
-  		gl.glBegin(GL.GL_LINE_LOOP);
-  		gl.glVertex2d(200.0, -160.0);
-  		gl.glVertex2d(260.0, -160.0);
-  		gl.glVertex2d(260.0, -200.0);
-  		gl.glVertex2d(200.0, -200.0);
-  	  gl.glEnd();
-      
-  	  if (telhado.isSelected())
-    	  gl.glColor3d(red, green, blue);
-  	  else
-    	  gl.glColor3d(1.0, 0.0, 0.0);  // telhado:
-    	gl.glBegin(GL.GL_TRIANGLES);
-    	gl.glVertex3d(100.0, -140.0, 50.0);  // 3D
-    	gl.glVertex3d(200.0, -60.0, -50.0);
-    	gl.glVertex3d(300.0, -140.0, 50.0);
-      gl.glEnd();
-    }
-*/
-    /*public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, int height) {
-    	GL gl = gLDrawable.getGL();
-    	gl.glViewport(0, 0, width, height); // altera-se o visor
-    } */
-    
+        
     public void reshape(GLAutoDrawable gLDrawable, int x, int y, int width, 
             int height) {
         final GL gl = gLDrawable.getGL();
-
-        if (height <= 0) // avoid a divide by zero error!
-            height = 1;
-        final float h = (float) width / (float) height;
+        
         gl.glViewport(0, 0, width, height);
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glLoadIdentity();
-        glu.gluPerspective(45.0f, h, 1.0, 20.0);
-        gl.glMatrixMode(GL.GL_MODELVIEW);
-        gl.glLoadIdentity();
+        
+        
     }
     
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {}
@@ -296,24 +285,17 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			yAxis += 1.0f;
-	        rquad -= 0.2f;
-			reDesenhar();
+			
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_UP) {
-			//yAxis = 0.0f;
-			xAxis += 1.0f;
-	        rquad -= 0.2f;
+			zoom -= 0.01f;
 	        reDesenhar();
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			yAxis -= 1.0f;
-	        rquad += 0.2f;
-	        reDesenhar();
+			
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-			xAxis += 1.0f;
-	        rquad += 0.2f;
+			zoom += 0.01f;
 	        reDesenhar();
 		}
 	}
