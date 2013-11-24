@@ -3,8 +3,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-
 
 
 class ObjectLoader {
@@ -13,12 +13,18 @@ class ObjectLoader {
     private final static String OBJ_VERTEX_TEXTURE = "vt";
     private final static String OBJ_FACE = "f";
     
-    private ArrayList<float[]> v = new ArrayList<float[]>();
+    //private ArrayList<float[]> v = new ArrayList<float[]>();
+    private HashMap<Integer, float[]> v = new HashMap<Integer, float[]>();
     private ArrayList<float[]> vt = new ArrayList<float[]>();
     private ArrayList<ArrayList<float[]>> f = new ArrayList<ArrayList<float[]>>();
     
     private float minx, miny, minz;
     private float maxx, maxy, maxz;
+    
+    private int polyCount = 0;
+    private int vCount = 0;
+	 
+	private boolean noTexture = false;
 
     public ObjectLoader() {
         // ...
@@ -77,7 +83,10 @@ class ObjectLoader {
             		maxz = z;
             	
             	float[] vline = {x, y, z};
-            	v.add(vline);
+            	//v.add(vline);
+            	v.put(vCount, vline);
+            	
+            	vCount++;
             	
 			} else if(tokens[0].equals(OBJ_VERTEX_TEXTURE)) {
 				float[] vtline = {	Float.parseFloat(tokens[1]),
@@ -103,8 +112,10 @@ class ObjectLoader {
 		ArrayList<float[]> faces = new ArrayList<float[]>();
 		String[] s1;
 		for(int i=1;i<s.length;i++) {
-			if(s[i].contains("//"))
+			if(s[i].contains("//")) {
 				s1 = s[i].split("//");
+				noTexture = true;
+			}
 			else
 				s1 = s[i].split("/");
 			if(s1.length>1) {
@@ -112,18 +123,21 @@ class ObjectLoader {
 								Float.parseFloat(s1[1])
 									};
 				faces.add(fline);
+				noTexture = false;
 			}
 			else {
 				float[] fline = { Float.parseFloat(s[i]), 0 };
 				faces.add(fline);
+				noTexture = true;
 			}
 		}
 		f.add(faces);
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private void printStruct() {
-		Iterator<float[]> it = v.iterator();
+		Iterator<float[]> it = v.values().iterator();
 		while(it.hasNext()) {
 			float[] v = it.next();
 			System.out.println("x: "+v[0]+" y: "+v[1]+" z: "+v[2]);
@@ -154,8 +168,16 @@ class ObjectLoader {
 		return f;
 	}
 	
-	public ArrayList<float[]> getVertices() {
+	public HashMap<Integer, float[]> getVertices() {
 		return v;
+	}
+	
+	public ArrayList<float[]> getTexturesVt() {
+		return vt;
+	}
+	
+	public boolean textureApplicable() {
+		return !noTexture;
 	}
 	
 	public float[] getMinVertices() {
@@ -174,9 +196,5 @@ class ObjectLoader {
 		return maxes;
 	}
 	 
-	 private int polyCount = 0;
 
 }
-
-
-

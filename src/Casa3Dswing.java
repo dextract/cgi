@@ -18,56 +18,60 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import java.awt.event.WindowAdapter;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
-import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
+import javax.imageio.ImageIO;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
-import com.sun.opengl.util.GLUT;
-
 /**
- * @author  M. Próspero
+ * @author 
  */
 
 public class Casa3Dswing implements GLEventListener, KeyListener {  
 
-	private float rquad = 0.0f;
-	private float xAxis = 0.0f;
-	private float yAxis = 0.0f;
-	private float zAxis = 0.0f;
 	private float zoom = 1.0f;
 	private ArrayList<ArrayList<float[]>> faces;
-	private ArrayList<float[]> vertices;
+	private HashMap<Integer, float[]> vertices;
+	private ArrayList<float[]> texturesVt;
 	private float[] minVertices;
 	private float[] maxVertices;
+	private boolean textureApplicable;
+	private boolean textureShown;
 
-    private GLU glu = new GLU();
+ 	GLU glu = new GLU();
 	
     public void init(GLAutoDrawable gLDrawable) {
     	glDraw = gLDrawable;
     	ObjectLoader ol = new ObjectLoader();
     	try {
-			ol.load(new File("objects/chess-game.obj"));
+			ol.load(new File("objects/box.obj"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	faces = ol.getFaces();
     	vertices = ol.getVertices();
     	minVertices = ol.getMinVertices();
     	maxVertices = ol.getMaxVertices();
+    	texturesVt = ol.getTexturesVt();
+    	textureApplicable = ol.textureApplicable();
+    	
     	GL gl = gLDrawable.getGL();
     	gl.glEnable(GL.GL_DEPTH_TEST);
     	gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     	glDraw.addKeyListener(this);
-    	// Podem adicionar-se outros listeners aqui (e.g. os do rato)
     }
     
     public void display(GLAutoDrawable gLDrawable) {
@@ -84,11 +88,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
   		 float py = (minVertices[1] + maxVertices[1]) / 2.0f;
   		 float pz = (minVertices[2] + maxVertices[2]) / 2.0f;
   		 float r = (float)Math.sqrt(Math.pow(maxVertices[0]-px,2)+Math.pow(maxVertices[1]-py,2)+Math.pow(maxVertices[2]-pz,2));
+  		 	 
   		 
-  		 float fDistance = (float)(r/Math.tan(Math.PI/6));
-  		 double dNear = fDistance - r;
-  		 double dFar = fDistance + r;
-
          gl.glMatrixMode(GL.GL_PROJECTION);
          gl.glLoadIdentity();
          
@@ -96,9 +97,9 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          // ortogonal
          // frente
          if (width <= height)
-        	 gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
+         	 gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
          else
-        	 gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
+         	 gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
          // planta 
          //gl.glRotatef(90, 1.0f, 0.0f, 0.0f);
          // esquerda
@@ -108,7 +109,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          
          
          // axonometrica
-         /*
+         
          double a = Math.PI/6;
          double b = Math.PI/6;
          double theta = (Math.atan(Math.sqrt(Math.tan(a)/Math.tan(b)))-Math.PI/2)*180/Math.PI;
@@ -116,7 +117,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
          gl.glRotated(gamma, 1.0f, 0.0f, 0.0f);
          gl.glRotated(theta, 0.0f, 1.0f, 0.0f);
-         */
+         
          
          
          // obliqua
@@ -132,46 +133,113 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          
          
          // perspectiva
-         //gl.glFrustum(-r, r, -r, r, dNear, dFar);
-         
+         /*float fDistance = (float)(r/Math.tan(Math.PI/6));
+  		 double dNear = fDistance - r;
+  		 double dFar = fDistance + r;
+  		 
+  		 if (width <= height)
+  			 gl.glFrustum(-r, r, -r/aspect, r/aspect, dNear, dFar);
+  		 else
+  			 gl.glFrustum(-r*aspect, r*aspect, -r, r, dNear, dFar);
+         */
          
          gl.glMatrixMode(GL.GL_MODELVIEW);
          gl.glLoadIdentity();
-         
-         
+ 
          // perspectiva
          //glu.gluLookAt(0.0f, 0.0f, fDistance*zoom, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
          
-         
-         Iterator<float[]> it;
-  		 Iterator<ArrayList<float[]>> it1 = faces.iterator();
-  		 
+        
   		 gl.glColor3f(0.5f, 0.5f, 0.5f);
   		 // wireframe
-  		 gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
+  		 //gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
   		 // fill
-  		 //gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
+  		 gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
 
   		 
   		 // center the model
   		 gl.glTranslatef(-px, -py, -pz);
-  		
-		 while(it1.hasNext()) {
+  		 
+  		 
+  		 if(!textureShown) {
+  			
+  			 File textureFile = new File("textures/leath01.png");
+  		 	 BufferedImage img = null;
+  		 	
+  		 	 try {
+  				img = ImageIO.read(textureFile);
+  			 } catch (IOException e) {
+  				e.printStackTrace();
+  			 }	
+	  		 WritableRaster raster = img.getRaster();	
+	 	     int widthR = raster.getWidth();	
+	 	     int heightR = raster.getHeight();	
+	 	     DataBuffer buf = raster.getDataBuffer();
+	 	     
+	      	 switch( buf.getDataType() ) {	
+	      	 	case DataBuffer.TYPE_BYTE:
+	      	 		DataBufferByte bb = (DataBufferByte) buf;	
+	      	 		byte im[] = bb.getData();
+	      	 		int[] textureId = new int[1];
+	      	 		gl.glActiveTexture(1);
+	      	 		gl.glGenTextures( 1, textureId, 0 );
+	      	 		gl.glBindTexture( GL.GL_TEXTURE_2D, textureId[0] );
+	      	 		gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
+	      	 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT);
+	      	 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_REPEAT);
+	      	 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+	      	 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+	      	 		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB, widthR, heightR, 	
+	      	 				0, GL.GL_BGR, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(im));
+	      	 		gl.glEnable(GL.GL_TEXTURE_2D);
+	      	 		
+	      	 		break;
+	      	 	case DataBuffer.TYPE_UNDEFINED:
+	      	 		break;
+	      	 } 
+	      	 
+	      	 textureShown=true;
+  		 }
+  		 
+  		 Iterator<float[]> it;
+  		 float[] pts = null;
+  		 float[] ptsT = null;
+  		 Iterator<ArrayList<float[]>> it1 = faces.iterator();
+  		 while(it1.hasNext()) {
 			it = it1.next().iterator();
-			
 			gl.glBegin(GL.GL_POLYGON);
-			
 			while(it.hasNext()) {
-				float[] p = it.next();
-				float[] pts = vertices.get((int)p[0]-1);
+				float[] el = it.next();
+				if(textureApplicable) {
+					ptsT = texturesVt.get((int)el[1]-1);
+					gl.glTexCoord2d(ptsT[0],ptsT[1]);
+				}
+				pts = vertices.get((int)el[0]-1);
 				gl.glVertex3f(pts[0],pts[1],pts[2]);
 			}
 			gl.glEnd();  
-
 		 }
-			gl.glFlush();
-			gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);    
-			
+		 gl.glFlush();
+		 
+		 gl.glColor3f(0.0f, 0.0f, 0.0f);
+		 gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
+		 it1 = faces.iterator();
+  		 while(it1.hasNext()) {
+			it = it1.next().iterator();
+			gl.glBegin(GL.GL_POLYGON);
+			while(it.hasNext()) {
+				pts = vertices.get((int)it.next()[0]-1);
+				gl.glVertex3f(pts[0],pts[1],pts[2]);
+			}
+			gl.glEnd();  
+		 }
+		 gl.glFlush();	
+		 gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);  
+		 
+	
+      	 
+      	
+		 
          /*
          gl.glBegin(GL.GL_QUADS);            // Draw A Quad
          gl.glColor3f(0.0f, 1.0f, 0.0f);     // Set The Color To Green
