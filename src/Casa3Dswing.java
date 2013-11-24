@@ -43,12 +43,12 @@ import javax.media.opengl.glu.GLU;
 public class Casa3Dswing implements GLEventListener, KeyListener {  
 
 	private float zoom = 1.0f;
+	private float moveSideways = 0.0f;
 	private ArrayList<ArrayList<float[]>> faces;
 	private HashMap<Integer, float[]> vertices;
 	private ArrayList<float[]> texturesVt;
 	private float[] minVertices;
 	private float[] maxVertices;
-	private boolean textureApplicable;
 	private boolean textureShown;
 
  	GLU glu = new GLU();
@@ -57,7 +57,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     	glDraw = gLDrawable;
     	ObjectLoader ol = new ObjectLoader();
     	try {
-			ol.load(new File("objects/box.obj"));
+			ol.load(new File("objects/teapot3.obj"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -66,7 +66,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     	minVertices = ol.getMinVertices();
     	maxVertices = ol.getMaxVertices();
     	texturesVt = ol.getTexturesVt();
-    	textureApplicable = ol.textureApplicable();
     	
     	GL gl = gLDrawable.getGL();
     	gl.glEnable(GL.GL_DEPTH_TEST);
@@ -96,10 +95,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
        
          // ortogonal
          // frente
-         if (width <= height)
-         	 gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
-         else
-         	 gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
+         //if (width <= height)
+         //	 gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
+         //else
+         //	 gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
          // planta 
          //gl.glRotatef(90, 1.0f, 0.0f, 0.0f);
          // esquerda
@@ -109,7 +108,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          
          
          // axonometrica
-         
+         /*
          double a = Math.PI/6;
          double b = Math.PI/6;
          double theta = (Math.atan(Math.sqrt(Math.tan(a)/Math.tan(b)))-Math.PI/2)*180/Math.PI;
@@ -117,7 +116,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
          gl.glRotated(gamma, 1.0f, 0.0f, 0.0f);
          gl.glRotated(theta, 0.0f, 1.0f, 0.0f);
-         
+         */
          
          
          // obliqua
@@ -133,21 +132,22 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          
          
          // perspectiva
-         /*float fDistance = (float)(r/Math.tan(Math.PI/6));
+         
+         float fDistance = (float)(r/Math.tan(Math.PI/5));
   		 double dNear = fDistance - r;
   		 double dFar = fDistance + r;
   		 
   		 if (width <= height)
-  			 gl.glFrustum(-r, r, -r/aspect, r/aspect, dNear, dFar);
+  			 gl.glFrustum(-r/5, r/5, -r/aspect/5, r/aspect/5, dNear, dFar*5);
   		 else
-  			 gl.glFrustum(-r*aspect, r*aspect, -r, r, dNear, dFar);
-         */
+  			 gl.glFrustum(-r*aspect/5, r*aspect/5, -r/5, r/5, dNear, dFar*5);
+         
          
          gl.glMatrixMode(GL.GL_MODELVIEW);
          gl.glLoadIdentity();
  
          // perspectiva
-         //glu.gluLookAt(0.0f, 0.0f, fDistance*zoom, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+         glu.gluLookAt(0.0f, 0.0f, fDistance*2*zoom, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
          
         
   		 gl.glColor3f(0.5f, 0.5f, 0.5f);
@@ -163,7 +163,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
   		 
   		 if(!textureShown) {
   			
-  			 File textureFile = new File("textures/leath01.png");
+  			 File textureFile = new File("textures/plast12.png");
   		 	 BufferedImage img = null;
   		 	
   		 	 try {
@@ -210,7 +210,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			gl.glBegin(GL.GL_POLYGON);
 			while(it.hasNext()) {
 				float[] el = it.next();
-				if(textureApplicable) {
+				if(el[1]!=0) {	// se textura aplicavel
 					ptsT = texturesVt.get((int)el[1]-1);
 					gl.glTexCoord2d(ptsT[0],ptsT[1]);
 				}
@@ -220,7 +220,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			gl.glEnd();  
 		 }
 		 gl.glFlush();
-		 
+		 /*
 		 gl.glColor3f(0.0f, 0.0f, 0.0f);
 		 gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
 		 it1 = faces.iterator();
@@ -235,7 +235,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		 }
 		 gl.glFlush();	
 		 gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);  
-		 
+		 */
 	
       	 
       	
@@ -416,25 +416,43 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 
 		}
-		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {;
-		}
+		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) { }
 		else if(e.getKeyCode() == KeyEvent.VK_UP) {
 			zoom -= 0.01f;
 	        reDesenhar();
 		}
-		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			
-		}
+		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) { }
 		else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
 			zoom += 0.01f;
 	        reDesenhar();
 		}
+		else if(e.getKeyCode() == KeyEvent.VK_ADD) {
+			zoom -= 0.01f;
+	        reDesenhar();
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_SUBTRACT) {
+			zoom += 0.01f;
+	        reDesenhar();
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_NUMPAD0) {
+			zoom = 1.0f;
+	        reDesenhar();
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_K) {
+			moveSideways += 0.01f;
+	        reDesenhar();
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_J) {
+			moveSideways -= 0.01f;
+	        reDesenhar();
+		}
+		
 	}
 
 	public void keyReleased(KeyEvent e) {}
 
     public static void main(String[] args) {
-    	JFrame frame = new JFrame("My JOGL house");
+    	JFrame frame = new JFrame("Projections");
     	GLCanvas canvas = new GLCanvas();
     	canvas.addGLEventListener(new Casa3Dswing());
     	canvas.setSize(400, 280);

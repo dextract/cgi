@@ -13,7 +13,6 @@ class ObjectLoader {
     private final static String OBJ_VERTEX_TEXTURE = "vt";
     private final static String OBJ_FACE = "f";
     
-    //private ArrayList<float[]> v = new ArrayList<float[]>();
     private HashMap<Integer, float[]> v = new HashMap<Integer, float[]>();
     private ArrayList<float[]> vt = new ArrayList<float[]>();
     private ArrayList<ArrayList<float[]>> f = new ArrayList<ArrayList<float[]>>();
@@ -23,8 +22,6 @@ class ObjectLoader {
     
     private int polyCount = 0;
     private int vCount = 0;
-	 
-	private boolean noTexture = false;
 
     public ObjectLoader() {
         // ...
@@ -83,7 +80,6 @@ class ObjectLoader {
             		maxz = z;
             	
             	float[] vline = {x, y, z};
-            	//v.add(vline);
             	v.put(vCount, vline);
             	
             	vCount++;
@@ -112,24 +108,26 @@ class ObjectLoader {
 		ArrayList<float[]> faces = new ArrayList<float[]>();
 		String[] s1;
 		for(int i=1;i<s.length;i++) {
-			if(s[i].contains("//")) {
+			
+			if(s[i].contains("//"))
 				s1 = s[i].split("//");
-				noTexture = true;
-			}
 			else
 				s1 = s[i].split("/");
-			if(s1.length>1) {
-				float[] fline = {	Float.parseFloat(s1[0]),
-								Float.parseFloat(s1[1])
-									};
+			
+			if(s1.length>1){
+				float[] fline = new float[2];
+				fline[0] = Float.parseFloat(s1[0]);
+				if(s[i].contains("//"))
+					fline[1] = 0;
+				else
+					fline[1] = Float.parseFloat(s1[1]);
 				faces.add(fline);
-				noTexture = false;
 			}
 			else {
 				float[] fline = { Float.parseFloat(s[i]), 0 };
 				faces.add(fline);
-				noTexture = true;
 			}
+			
 		}
 		f.add(faces);
 	}
@@ -174,10 +172,6 @@ class ObjectLoader {
 	
 	public ArrayList<float[]> getTexturesVt() {
 		return vt;
-	}
-	
-	public boolean textureApplicable() {
-		return !noTexture;
 	}
 	
 	public float[] getMinVertices() {
