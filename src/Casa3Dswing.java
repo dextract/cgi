@@ -1,7 +1,10 @@
 import javax.swing.*;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,6 +28,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -61,7 +66,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         glDraw = gLDrawable;
         ObjectLoader ol = new ObjectLoader();
         try {
-            ol.load(new File("objects/box.obj"));
+            ol.load(new File("objects/archer.obj"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -125,8 +130,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	              gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
 	         else
 	              gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
-	         double l = 0.5;
-	         double alpha = Math.PI/4;
+	         //double l = 0.5;
+	         double l = Double.parseDouble(lTF.getText());
+	         //double alpha = Math.PI/4;
+	         double alpha = Math.toRadians(Integer.parseInt(alphaTF.getText()));
 	         double[] m = {    1,0,-l*Math.cos(alpha),0,
 	                         0,1,-l*Math.sin(alpha),0,
 	                         0,0,1,0,
@@ -262,17 +269,54 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			}
 		}
     	
-        ChangeListener sliderListener = new ChangeListener()
-        {
-           public void stateChanged(ChangeEvent event)
-           {
-              // update text field when the slider value changes
-              JSlider source = (JSlider) event.getSource();
-             // textField.setText("" + source.getValue());
-           }
+    	class SliderListener implements ChangeListener {
+        	public void stateChanged(ChangeEvent event) {
+        		JSlider source = (JSlider) event.getSource();
+        		if(source==lSlider) {
+        		    if (!source.getValueIsAdjusting()) //done adjusting
+        		    	lTF.setValue((double)source.getValue()/10);
+        		    else
+        		    	lTF.setText("" + (double)source.getValue()/10);
+        		}
+        		else if(source==alphaSlider) {
+        			if (!source.getValueIsAdjusting()) //done adjusting
+        				alphaTF.setValue(source.getValue());
+        			else
+        				alphaTF.setText("" + source.getValue());
+        		}
+        		
+        		reDesenhar();
+        	}
+        };
+        
+        class TextListener implements PropertyChangeListener {	
+			public void propertyChange(PropertyChangeEvent e) {
+				if ("value".equals(e.getPropertyName())) {
+					JFormattedTextField source = (JFormattedTextField) e.getSource();
+					Object nValue = e.getNewValue();
+					int value = 0;
+					if(nValue instanceof String)
+						value = Integer.parseInt((String)nValue);
+					else if(nValue instanceof Integer)
+						value = (Integer)nValue;
+					else if(nValue instanceof Double)
+						value = (int) ((Double)nValue*10);
+					
+					if(source==lTF)
+						lSlider.setValue(value);
+					else if(source==alphaTF)
+						alphaSlider.setValue(value);
+					
+					reDesenhar();
+				}
+			}
         };
     		
-		RBListener radioListener= new RBListener();
+		RBListener radioListener = new RBListener();
+		SliderListener lListener = new SliderListener();
+		SliderListener alphaListener = new SliderListener();
+		TextListener lTFListener = new TextListener();
+		TextListener alphaTFListener = new TextListener();
     	
         painel = new JPanel();
         tabs = new JTabbedPane();
@@ -287,30 +331,55 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         esq = new JRadioButton("Alç. Lat. Esquerdo");
         pla = new JRadioButton("Planta");
         
-        alpha = new JSlider(JSlider.HORIZONTAL, 0, 90, 45);
-        JLabel alphaLabel = new JLabel("Alpha", JLabel.CENTER);
-        alpha.setPaintTicks(true);
-        alpha.setPaintLabels(true);
-        alpha.setMajorTickSpacing(10);
-        alpha.setMinorTickSpacing(5);
-        alpha.add(alphaLabel);
+        alphaSlider = new JSlider(JSlider.HORIZONTAL, 0, 90, 45);
+        JLabel alphaLabel = new JLabel("\u03B1", JLabel.CENTER);
+        alphaLabel.setFont(new Font(alphaLabel.getName(), Font.PLAIN, 20));
+        alphaLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        alphaSlider.setPaintTicks(true);
+        alphaSlider.setPaintLabels(true);
+        alphaSlider.setMajorTickSpacing(10);
+        alphaSlider.setMinorTickSpacing(5);
+        alphaSlider.add(alphaLabel);
+        alphaSlider.addChangeListener(alphaListener);
         
-        l = new JSlider(JSlider.HORIZONTAL, 0, 10, 5);  
+        tabOblq.add(alphaLabel);
+        
+        
         Hashtable labelTable = new Hashtable();
         labelTable.put( new Integer( 0 ), new JLabel("0") );
         labelTable.put( new Integer( 5 ), new JLabel("0.5") );
         labelTable.put( new Integer( 10 ), new JLabel("1") );
-        l.setLabelTable( labelTable );
-        JLabel lLabel = new JLabel("l", JLabel.CENTER);
-        l.setPaintTicks(true);
-        l.setPaintLabels(true);
-        l.setMajorTickSpacing(10);
-        l.setMinorTickSpacing(5);
-        l.add(lLabel);
+        
+        lSlider = new JSlider(JSlider.HORIZONTAL, 0, 10, 5);  
+        lSlider.setLabelTable(labelTable);
+        JLabel lLabel = new JLabel("\u2113", JLabel.RIGHT);
+        lLabel.setFont(new Font(lLabel.getName(), Font.PLAIN, 20));
+        lSlider.setPaintTicks(true);
+        lSlider.setPaintLabels(true);
+        lSlider.setMajorTickSpacing(10);
+        lSlider.setMinorTickSpacing(1);
+        lSlider.add(lLabel);
+        lSlider.addChangeListener(lListener);
+        
+        alphaTF = new JFormattedTextField("45");
+        alphaTF.addPropertyChangeListener(alphaTFListener);
+   
+        lTF = new JFormattedTextField("0.5");
+        lTF.addPropertyChangeListener(lTFListener);
         
         tabOblq.setLayout(new FlowLayout(FlowLayout.LEFT));
-        tabOblq.add(alpha);
-        tabOblq.add(l);
+        tabOblq.add(alphaSlider);
+        tabOblq.add(alphaTF);
+        tabOblq.add(Box.createRigidArea(new Dimension(10,0)));
+        tabOblq.add(lLabel);
+        tabOblq.add(lSlider);
+        tabOblq.add(lTF);
+
+        
+       
+        
+        
+        
         
         ButtonGroup ortGroup = new ButtonGroup();
         ortGroup.add(pri);
@@ -323,11 +392,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         dir.addActionListener(radioListener);
         esq.addActionListener(radioListener);
         pla.addActionListener(radioListener);
-        
-        
-        
-        
-        
         
         
         tabOrto.add(pri);
@@ -344,6 +408,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         painel.add(tabs);
         return painel;
     }
+    
    
     public void keyTyped(KeyEvent e) {
         if (e.getKeyChar() == '\u001B' ||  // escape
@@ -437,10 +502,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     private static JRadioButton dir; //alç. lat. direito
     private static JRadioButton pla; //planta
     private static JRadioButton esq; //alç. lat. esquerdo
-    private static JSlider alpha;
-    private static JSlider l;
-    private static JTextField alphaTF; //alpha text field
-    private static JTextField lTF; //l text field
+    private static JSlider alphaSlider;
+    private static JSlider lSlider;
+    private static JFormattedTextField alphaTF; //alpha text field
+    private static JFormattedTextField lTF; //l text field
 
 
     
