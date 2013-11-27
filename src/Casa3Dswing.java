@@ -130,10 +130,12 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	              gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
 	         else
 	              gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
+
 	         //double l = 0.5;
 	         double l = Double.parseDouble(lTF.getText());
 	         //double alpha = Math.PI/4;
 	         double alpha = Math.toRadians(Integer.parseInt(alphaTF.getText()));
+
 	         double[] m = {    1,0,-l*Math.cos(alpha),0,
 	                         0,1,-l*Math.sin(alpha),0,
 	                         0,0,1,0,
@@ -345,10 +347,12 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         tabOblq.add(alphaLabel);
         
         
+
         Hashtable labelTable = new Hashtable();
         labelTable.put( new Integer( 0 ), new JLabel("0") );
         labelTable.put( new Integer( 5 ), new JLabel("0.5") );
         labelTable.put( new Integer( 10 ), new JLabel("1") );
+
         
         lSlider = new JSlider(JSlider.HORIZONTAL, 0, 10, 5);  
         lSlider.setLabelTable(labelTable);
@@ -376,10 +380,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         tabOblq.add(lTF);
 
         
-       
-        
-        
-        
         
         ButtonGroup ortGroup = new ButtonGroup();
         ortGroup.add(pri);
@@ -392,7 +392,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         dir.addActionListener(radioListener);
         esq.addActionListener(radioListener);
         pla.addActionListener(radioListener);
-        
         
         tabOrto.add(pri);
         tabOrto.add(dir);
