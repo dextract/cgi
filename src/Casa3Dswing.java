@@ -1,6 +1,7 @@
 import javax.swing.*;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
@@ -59,7 +61,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         glDraw = gLDrawable;
         ObjectLoader ol = new ObjectLoader();
         try {
-            ol.load(new File("objects/chess-game.obj"));
+            ol.load(new File("objects/box.obj"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,17 +100,23 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          // ortogonal
          if(tabOp == 0) {
 	         // frente
-	         if (width <= height)
-	       
+	         if (width <= height)	       
 	        	 gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
 	         else
 	              gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
+	         
 	         // planta
-	         //gl.glRotatef(90, 1.0f, 0.0f, 0.0f);
+	         if(pla.isSelected()) {
+	        	 gl.glRotatef(90, 1.0f, 0.0f, 0.0f);
+	         }
 	         // esquerda
-	         //gl.glRotatef(90, 0.0f, 1.0f, 0.0f);
+	         else if (esq.isSelected()) {
+	        	 gl.glRotatef(90, 0.0f, 1.0f, 0.0f);
+	         }
 	         // direita
-	         //gl.glRotatef(-90, 0.0f, 1.0f, 0.0f);
+	         else if (dir.isSelected()) {
+	        	 gl.glRotatef(-90, 0.0f, 1.0f, 0.0f);
+	         }
         	 
          } else if(tabOp == 1) {	         
 	         //obliqua
@@ -121,7 +129,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	         double alpha = Math.PI/4;
 	         double[] m = {    1,0,-l*Math.cos(alpha),0,
 	                         0,1,-l*Math.sin(alpha),0,
-	                         0,0,0,0,
+	                         0,0,1,0,
 	                         0,0,0,1    };
 	         gl.glMultTransposeMatrixd(m, 0);
 	         
@@ -248,6 +256,24 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
    
     public static JPanel criarPainel() {
 
+    	class RBListener implements ActionListener {		
+			public void actionPerformed(ActionEvent event) {
+				reDesenhar();
+			}
+		}
+    	
+        ChangeListener sliderListener = new ChangeListener()
+        {
+           public void stateChanged(ChangeEvent event)
+           {
+              // update text field when the slider value changes
+              JSlider source = (JSlider) event.getSource();
+             // textField.setText("" + source.getValue());
+           }
+        };
+    		
+		RBListener radioListener= new RBListener();
+    	
         painel = new JPanel();
         tabs = new JTabbedPane();
        
@@ -255,14 +281,66 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         tabOblq = new JPanel();
         tabAxon = new JPanel();
         tabPers = new JPanel();
-       
+        
+        pri = new JRadioButton("Alçado Principal");
+        dir = new JRadioButton("Alç. Lat. Direito");
+        esq = new JRadioButton("Alç. Lat. Esquerdo");
+        pla = new JRadioButton("Planta");
+        
+        alpha = new JSlider(JSlider.HORIZONTAL, 0, 90, 45);
+        JLabel alphaLabel = new JLabel("Alpha", JLabel.CENTER);
+        alpha.setPaintTicks(true);
+        alpha.setPaintLabels(true);
+        alpha.setMajorTickSpacing(10);
+        alpha.setMinorTickSpacing(5);
+        alpha.add(alphaLabel);
+        
+        l = new JSlider(JSlider.HORIZONTAL, 0, 10, 5);  
+        Hashtable labelTable = new Hashtable();
+        labelTable.put( new Integer( 0 ), new JLabel("0") );
+        labelTable.put( new Integer( 5 ), new JLabel("0.5") );
+        labelTable.put( new Integer( 10 ), new JLabel("1") );
+        l.setLabelTable( labelTable );
+        JLabel lLabel = new JLabel("l", JLabel.CENTER);
+        l.setPaintTicks(true);
+        l.setPaintLabels(true);
+        l.setMajorTickSpacing(10);
+        l.setMinorTickSpacing(5);
+        l.add(lLabel);
+        
+        tabOblq.setLayout(new FlowLayout(FlowLayout.LEFT));
+        tabOblq.add(alpha);
+        tabOblq.add(l);
+        
+        ButtonGroup ortGroup = new ButtonGroup();
+        ortGroup.add(pri);
+        ortGroup.add(dir);
+        ortGroup.add(esq);
+        ortGroup.add(pla);
+        pri.setSelected(true); //estado default
+        
+        pri.addActionListener(radioListener);
+        dir.addActionListener(radioListener);
+        esq.addActionListener(radioListener);
+        pla.addActionListener(radioListener);
+        
+        
+        
+        
+        
+        
+        
+        tabOrto.add(pri);
+        tabOrto.add(dir);
+        tabOrto.add(esq);
+        tabOrto.add(pla);      
+     
         painel.setLayout(new GridLayout(1, 4));
         tabs.addTab("Ortogonal", tabOrto);
         tabs.addTab("Obliqua", tabOblq);
         tabs.addTab("Axonometrica", tabAxon);
         tabs.addTab("Perspectiva", tabPers);
-   
-       
+        
         painel.add(tabs);
         return painel;
     }
@@ -305,10 +383,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         
         reDesenhar();
        
-    }
-    
-    
-    
+    }  
 
     public void keyReleased(KeyEvent e) {}
     
@@ -358,6 +433,17 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     private static JPanel tabOblq;
     private static JPanel tabAxon;
     private static JPanel tabPers;
+    private static JRadioButton pri; //alç. principal
+    private static JRadioButton dir; //alç. lat. direito
+    private static JRadioButton pla; //planta
+    private static JRadioButton esq; //alç. lat. esquerdo
+    private static JSlider alpha;
+    private static JSlider l;
+    private static JTextField alphaTF; //alpha text field
+    private static JTextField lTF; //l text field
+
+
+    
     private static int tabOp = 0;
    
 }
