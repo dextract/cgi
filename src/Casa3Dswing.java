@@ -2,6 +2,7 @@ import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -125,8 +126,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	              gl.glOrtho(-r*zoom, r*zoom, -r/aspect*zoom, r/aspect*zoom, -r, r);
 	         else
 	              gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom, -r, r);
-	         double l = 0.5;
-	         double alpha = Math.PI/4;
+	         double l = lSlider.getValue()/10.0 ;
+	         double alpha = Math.toRadians(alphaSlider.getValue());
 	         double[] m = {    1,0,-l*Math.cos(alpha),0,
 	                         0,1,-l*Math.sin(alpha),0,
 	                         0,0,1,0,
@@ -268,6 +269,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
            {
               // update text field when the slider value changes
               JSlider source = (JSlider) event.getSource();
+              reDesenhar();
              // textField.setText("" + source.getValue());
            }
         };
@@ -287,30 +289,38 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         esq = new JRadioButton("Alç. Lat. Esquerdo");
         pla = new JRadioButton("Planta");
         
-        alpha = new JSlider(JSlider.HORIZONTAL, 0, 90, 45);
-        JLabel alphaLabel = new JLabel("Alpha", JLabel.CENTER);
-        alpha.setPaintTicks(true);
-        alpha.setPaintLabels(true);
-        alpha.setMajorTickSpacing(10);
-        alpha.setMinorTickSpacing(5);
-        alpha.add(alphaLabel);
+        Font labelFont = new Font("Serif", Font.ITALIC, 18);
         
-        l = new JSlider(JSlider.HORIZONTAL, 0, 10, 5);  
+        alphaSlider = new JSlider(JSlider.HORIZONTAL, 0, 90, 45);
+        JLabel alphaLabel = new JLabel("Alpha", JLabel.CENTER);
+        alphaLabel.setFont(labelFont);
+        alphaSlider.setPaintTicks(true);
+        alphaSlider.setPaintLabels(true);
+        alphaSlider.setMajorTickSpacing(15);
+        alphaSlider.setMinorTickSpacing(5);
+        
+        
+        lSlider = new JSlider(JSlider.HORIZONTAL, 0, 10, 5);  
         Hashtable labelTable = new Hashtable();
         labelTable.put( new Integer( 0 ), new JLabel("0") );
         labelTable.put( new Integer( 5 ), new JLabel("0.5") );
         labelTable.put( new Integer( 10 ), new JLabel("1") );
-        l.setLabelTable( labelTable );
-        JLabel lLabel = new JLabel("l", JLabel.CENTER);
-        l.setPaintTicks(true);
-        l.setPaintLabels(true);
-        l.setMajorTickSpacing(10);
-        l.setMinorTickSpacing(5);
-        l.add(lLabel);
+        lSlider.setLabelTable( labelTable );
+        JLabel lLabel = new JLabel("l", JLabel.CENTER); 
+        lLabel.setFont(labelFont);
+        lSlider.setPaintTicks(true);
+        lSlider.setPaintLabels(true);
+        lSlider.setMajorTickSpacing(10);
+        lSlider.setMinorTickSpacing(5);        
         
-        tabOblq.setLayout(new FlowLayout(FlowLayout.LEFT));
-        tabOblq.add(alpha);
-        tabOblq.add(l);
+        alphaSlider.addChangeListener(sliderListener);
+        lSlider.addChangeListener(sliderListener);
+        tabOblq.add(alphaLabel);
+        tabOblq.add(lLabel);
+        tabOblq.add(alphaSlider);
+        tabOblq.add(lSlider);
+
+        tabOblq.setLayout(new GridLayout(2, 2));
         
         ButtonGroup ortGroup = new ButtonGroup();
         ortGroup.add(pri);
@@ -323,12 +333,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         dir.addActionListener(radioListener);
         esq.addActionListener(radioListener);
         pla.addActionListener(radioListener);
-        
-        
-        
-        
-        
-        
         
         tabOrto.add(pri);
         tabOrto.add(dir);
@@ -437,8 +441,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     private static JRadioButton dir; //alç. lat. direito
     private static JRadioButton pla; //planta
     private static JRadioButton esq; //alç. lat. esquerdo
-    private static JSlider alpha;
-    private static JSlider l;
+    private static JSlider alphaSlider;
+    private static JSlider lSlider;
     private static JTextField alphaTF; //alpha text field
     private static JTextField lTF; //l text field
 
