@@ -14,6 +14,10 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
@@ -61,33 +65,42 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     private boolean textureShown;
 
      GLU glu = new GLU();
-   
-    public void init(GLAutoDrawable gLDrawable) {
-        glDraw = gLDrawable;
-        ObjectLoader ol = new ObjectLoader();
-        try {
-            ol.load(new File("objects/archer.obj"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        faces = ol.getFaces();
-        vertices = ol.getVertices();
-        minVertices = ol.getMinVertices();
-        maxVertices = ol.getMaxVertices();
-        texturesVt = ol.getTexturesVt();
-       
-        GL gl = gLDrawable.getGL();
-        gl.glEnable(GL.GL_DEPTH_TEST);
-        gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-        glDraw.addKeyListener(this);
-    }
-   
-    public void display(GLAutoDrawable gLDrawable) {
+     
+     public void init(GLAutoDrawable gLDrawable) {
+    	 
+    	 glDraw = gLDrawable;
+         ObjectLoader ol = new ObjectLoader(); 
+    	 
+         try {
+             ol.load(objFile);
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+         
+         if(objFile != null) { 
+	         faces = ol.getFaces();
+	         vertices = ol.getVertices();
+	         minVertices = ol.getMinVertices();
+	         maxVertices = ol.getMaxVertices();
+	         texturesVt = ol.getTexturesVt();
+         }
+        
+         GL gl = gLDrawable.getGL();
+         gl.glEnable(GL.GL_DEPTH_TEST);
+         gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+         glDraw.addKeyListener(this);
+     }
+    
+     public void display(GLAutoDrawable gLDrawable) {
+    	 
          final GL gl = gLDrawable.getGL();
        
          gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-        
-        
+         
+         if(objFile == null)
+        	 return;
+       
+         
          int height = gLDrawable.getHeight();
          int width = gLDrawable.getWidth();
          float aspect = (float)width / (float)height;
@@ -260,7 +273,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     public void displayChanged(GLAutoDrawable gLDrawable, boolean modeChanged, boolean deviceChanged) {}
 
     public static void reDesenhar() {
-        glDraw.display();
+    		glDraw.display();
     }
    
     public static JPanel criarPainel() {
@@ -460,6 +473,12 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
          frame.add(canvas, BorderLayout.CENTER);
         JPanel painel = criarPainel();
         frame.add(painel, BorderLayout.SOUTH);
+        JMenuBar barra = new JMenuBar();
+        barra.add(loadNewObject());
+//        barra.add(loadNewTexture());
+		barra.add(visibilityOptions());
+		barra.add(about());       
+        frame.setJMenuBar(barra);
         frame.pack();
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -468,12 +487,11 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
         });
          canvas.requestFocusInWindow();
         frame.setVisible(true);
-        
+       
+     
         tabs.addChangeListener(new ChangeListener() {
 	        public void stateChanged(ChangeEvent e) {
-	        	
-	        	System.out.println(tabs.getSelectedIndex());
-	        	
+	        		        	
 	        	if(tabs.getSelectedIndex() == 0)
 	        		tabOp = 0;
 	        	else if(tabs.getSelectedIndex() == 1)
@@ -488,6 +506,98 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     	}
         );
     }
+    
+    private static JMenu loadNewObject() {
+		JMenu menu = new JMenu("Carregar objecto");
+		menu.add(loadObjectItem());
+		return menu;
+	}
+    
+    private static JMenuItem loadObjectItem() {
+    	
+		JMenuItem item = new JMenuItem("Abrir...");
+    	final JFileChooser fc = new JFileChooser();
+		final JFrame f = new JFrame();
+		
+		class LoadObj implements ActionListener {
+			public void actionPerformed(ActionEvent e) {
+	    	 
+	            int returnVal = fc.showOpenDialog(f);
+	 
+	            if (returnVal == JFileChooser.APPROVE_OPTION) {
+	                objFile = fc.getSelectedFile();
+	                reDesenhar();
+	            }
+			}
+		}
+		
+		item.addActionListener(new LoadObj());
+		return item;	
+    }
+    
+    private static JMenu visibilityOptions() {
+		JMenu menu = new JMenu("Opções de visibilidade");
+		menu.add(visibilityItem("Malha de arame"));
+		menu.add(visibilityItem("Preencher poligonos"));
+		return menu;
+	}
+    
+    private static JMenuItem visibilityItem(String texto) {
+		final JCheckBoxMenuItem item = new JCheckBoxMenuItem(texto);
+		
+		class ListenerItemMenu implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e) {
+				if(e.getActionCommand().equals("Malha de arame")) {
+					
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);				
+					
+					wireframe = (wireframe) ? false : true;
+				}
+				else if(e.getActionCommand().equals("Preencher poligonos")) {
+					
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);				
+					
+					fill = (fill) ? false : true;					
+				}
+
+			}	
+		}
+		
+		item.addActionListener(new ListenerItemMenu());
+		return item;	
+	}
+    
+    private static JMenuItem aboutItem(String texto) 
+	{
+		JMenuItem item = new JMenuItem(texto);
+
+		class ListenerItemMenu implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if(e.getActionCommand().equals("About"))
+					JOptionPane.showMessageDialog(null, 
+							"Trabalho Pratico 2 \n - Vladislav Pinzhuro, 34224\n - Joao Costa, 41726");
+			}
+		}
+		
+		item.addActionListener(new ListenerItemMenu());
+		return item;
+	}
+	private static JMenu about()
+	{
+		JMenu menu = new JMenu("Help");		
+		
+		menu.add(aboutItem("About"));
+		return menu;
+	}
    
     private static GLAutoDrawable glDraw;
    
@@ -505,8 +615,9 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
     private static JSlider lSlider;
     private static JFormattedTextField alphaTF; //alpha text field
     private static JFormattedTextField lTF; //l text field
-
-
+    private static boolean wireframe = false;
+    private static boolean fill = false;
+    private static File objFile = null;
     
     private static int tabOp = 0;
    
