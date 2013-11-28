@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
+
 import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -45,24 +46,23 @@ import javax.media.opengl.glu.GLU;
  */
 public class Casa3Dswing implements GLEventListener, KeyListener { 
 
+
 	private float zoom = 1.0f;
-	private ArrayList<ArrayList<float[]>> faces;
-	private HashMap<Integer, float[]> vertices;
-	private ArrayList<float[]> texturesVt;
-	private float[] minVertices;
-	private float[] maxVertices;
-	private boolean textureShown;
+	private static ArrayList<ArrayList<float[]>> faces;
+	private static HashMap<Integer, float[]> vertices;
+	private static ArrayList<float[]> texturesVt;
+	private static float[] minVertices;
+	private static float[] maxVertices;
+	private boolean textureLoaded;
 
 	GLU glu = new GLU();
 
 	public void init(GLAutoDrawable gLDrawable) {
+
 		glDraw = gLDrawable;
-		ObjectLoader ol = new ObjectLoader(new File("objects/avatar_head.obj"));
-		faces = ol.getFaces();
-		vertices = ol.getVertices();
-		minVertices = ol.getMinVertices();
-		maxVertices = ol.getMaxVertices();
-		texturesVt = ol.getTexturesVt();
+
+		if(objFile != null) 
+			loadObject(glDraw);
 
 		GL gl = gLDrawable.getGL();
 		gl.glEnable(GL.GL_DEPTH_TEST);
@@ -70,9 +70,34 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		glDraw.addKeyListener(this);
 	}
 
+	private static void loadObject(GLAutoDrawable gLDrawable) {
+		ObjectLoader ol = new ObjectLoader(); 
+
+		if(objFile != null) { 
+			System.out.println(1);
+			try {
+				ol.load(objFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}       
+		}
+
+
+		faces = ol.getFaces();
+		vertices = ol.getVertices();
+		minVertices = ol.getMinVertices();
+		maxVertices = ol.getMaxVertices();
+		texturesVt = ol.getTexturesVt();
+
+	}
+
+
 	public void display(GLAutoDrawable gLDrawable) {
 		final GL gl = gLDrawable.getGL();
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+
+		if(objFile == null)
+			return;
 
 		int height = gLDrawable.getHeight();
 		int width = gLDrawable.getWidth();
@@ -87,7 +112,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 		gl.glMatrixMode(GL.GL_PROJECTION);
 		gl.glLoadIdentity();
-
 
 		// ortogonal
 		if(tabOp == 0) {
@@ -166,7 +190,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			double right = r/5;
 			double bottom = -r/5;
 			double top = r/5;
-			
+
 			if(width<=height) {
 				bottom /= aspect;
 				top /= aspect;
@@ -175,40 +199,34 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				left *= aspect;
 				right *= aspect;
 			}
-			
-			gl.glFrustum(left, right, bottom, top, zNear, zFar);
+
+			gl.glFrustum(left*zoom, right*zoom, bottom*zoom, top*zoom, zNear, zFar);
 
 		}
 
 		gl.glMatrixMode(GL.GL_MODELVIEW);
 		gl.glLoadIdentity();
 
-
-		
 		if(tabOp == 3) {
-			
-			
-			double eyeXD = Double.parseDouble(eyeXTF.getText());
-			double eyeYD = Double.parseDouble(eyeYTF.getText());
-			double eyeZD = Double.parseDouble(eyeZTF.getText());
-		
-			glu.gluLookAt(0.0f+eyeXD, 0.0f+eyeYD, (fDistance*1.5)*zoom+eyeZD,
-					0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-			
-		}
 
-		gl.glColor3f(0.5f, 0.5f, 0.5f);
-		// wireframe
-		//gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE);
-		// fill
-		gl.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL);
+			double max = Math.max(maxVertices[0], Math.max(maxVertices[1], maxVertices[2]));
+
+			double eyeXD = Double.parseDouble(eyeXTF.getText())*max;
+			double eyeYD = Double.parseDouble(eyeYTF.getText())*max;
+			double eyeZD = Double.parseDouble(eyeZTF.getText())*max;
+
+			glu.gluLookAt(0.0f+eyeXD, 0.0f+eyeYD, (fDistance*1.5)+eyeZD,
+					0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+
+		}
 
 
 		// center the model
 		gl.glTranslatef(-px, -py, -pz);
 
 
-		if(!textureShown) {
+
+		if(!textureLoaded) {
 
 			File textureFile = new File("textures/leath01.png");
 			BufferedImage img = null;
@@ -231,10 +249,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				gl.glActiveTexture(1);
 				gl.glGenTextures( 1, textureId, 0 );
 				gl.glBindTexture( GL.GL_TEXTURE_2D, textureId[0] );
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
-						GL.GL_DECAL);
+				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
+				//				GL.GL_DECAL);
 				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
-						GL.GL_REPEAT);
+						GL.GL_REPEAT);				
 				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
 						GL.GL_REPEAT);
 				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER,
@@ -250,9 +268,17 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				break;
 			}
 
-			textureShown=true;
+			textureLoaded=true;
 		}
-
+		
+		if(fill) {
+			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
+			gl.glColor3f(0.7f, 0.7f, 0.7f);
+		}
+		else {
+			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_POINT);
+			gl.glColor3f(0.0f, 0.0f, 0.0f);
+		}
 		Iterator<float[]> it;
 		float[] pts = null;
 		float[] ptsT = null;
@@ -262,14 +288,31 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			gl.glBegin(GL.GL_POLYGON);
 			while(it.hasNext()) {
 				float[] el = it.next();
-				if(el[1]!=0) {    // se textura aplicavel
-					ptsT = texturesVt.get((int)el[1]-1);
-					gl.glTexCoord2d(ptsT[0],ptsT[1]);
+				if(texture) {
+					if(el[1]!=0) {    // se textura aplicavel ao vertice
+						ptsT = texturesVt.get((int)el[1]-1);
+						gl.glTexCoord2d(ptsT[0],ptsT[1]);
+					}
 				}
 				pts = vertices.get((int)el[0]-1);
 				gl.glVertex3f(pts[0],pts[1],pts[2]);
 			}
 			gl.glEnd(); 
+		}
+		if(wireframe) {
+			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+			gl.glColor3f(0.0f, 0.0f, 0.0f);
+			it1 = faces.iterator();
+			while(it1.hasNext()) {
+				it = it1.next().iterator();
+				gl.glBegin(GL.GL_POLYGON);
+				while(it.hasNext()) {
+					float[] el = it.next();
+					pts = vertices.get((int)el[0]-1);
+					gl.glVertex3f(pts[0],pts[1],pts[2]);
+				}
+				gl.glEnd(); 
+			}
 		}
 		gl.glFlush();
 	}
@@ -293,6 +336,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	public static JPanel criarPainel() {
 
 		class RadioButtonListener implements ActionListener {		
+
 			public void actionPerformed(ActionEvent event) {
 				reDesenhar();
 			}
@@ -302,63 +346,62 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
 
-				
-					if(source==lSlider) {
-						if (!source.getValueIsAdjusting())
-							lTF.setValue((double)source.getValue()/100);
-						else
-							lTF.setText("" + (double)source.getValue()/100);
-					}
-					else if(source==alphaSlider) {
-						if (!source.getValueIsAdjusting())
-							alphaTF.setValue(source.getValue());
-						else
-							alphaTF.setText("" + source.getValue());
-					}
-					else if(source==aSlider) {
-						if (!source.getValueIsAdjusting()) 
-							aTF.setValue(source.getValue());
-						else
-							aTF.setText("" + source.getValue());
-					}
-					else if(source==bSlider) {
-						if (!source.getValueIsAdjusting())
-							bTF.setValue(source.getValue());
-						else
-							bTF.setText("" + source.getValue());
-					}
-					else if(source==aMSlider) {
-						if (!source.getValueIsAdjusting())
-							aMTF.setValue(source.getValue());
-						else
-							aMTF.setText("" + source.getValue());
-					}
-					else if(source==bMSlider) {
-						if (!source.getValueIsAdjusting())
-							bMTF.setValue(source.getValue());
-						else
-							bMTF.setText("" + source.getValue());
-					}
-					else if(source==eyeXSlider) {
-						if (!source.getValueIsAdjusting())
-							eyeXTF.setValue((double)source.getValue()/100);
-						else
-							eyeXTF.setText("" + (double)source.getValue()/100);
-					}
-					else if(source==eyeYSlider) {
-						if (!source.getValueIsAdjusting())
-							eyeYTF.setValue((double)source.getValue()/100);
-						else
-							eyeYTF.setText("" + (double)source.getValue()/100);
-					}
-					else if(source==eyeZSlider) {
-						if (!source.getValueIsAdjusting())
-							eyeZTF.setValue((double)source.getValue());
-						else
-							eyeZTF.setText("" + (double)source.getValue()/100);
-					}
+				if(source==lSlider) {
+					if (!source.getValueIsAdjusting())
+						lTF.setValue((double)source.getValue()/100);
+					else
+						lTF.setText("" + (double)source.getValue()/100);
+				}
+				else if(source==alphaSlider) {
+					if (!source.getValueIsAdjusting())
+						alphaTF.setValue(source.getValue());
+					else
+						alphaTF.setText("" + source.getValue());
+				}
+				else if(source==aSlider) {
+					if (!source.getValueIsAdjusting()) 
+						aTF.setValue(source.getValue());
+					else
+						aTF.setText("" + source.getValue());
+				}
+				else if(source==bSlider) {
+					if (!source.getValueIsAdjusting())
+						bTF.setValue(source.getValue());
+					else
+						bTF.setText("" + source.getValue());
+				}
+				else if(source==aMSlider) {
+					if (!source.getValueIsAdjusting())
+						aMTF.setValue(source.getValue());
+					else
+						aMTF.setText("" + source.getValue());
+				}
+				else if(source==bMSlider) {
+					if (!source.getValueIsAdjusting())
+						bMTF.setValue(source.getValue());
+					else
+						bMTF.setText("" + source.getValue());
+				}
+				else if(source==eyeXSlider) {
+					if (!source.getValueIsAdjusting())
+						eyeXTF.setValue((double)source.getValue()/100);
+					else
+						eyeXTF.setText("" + (double)source.getValue()/100);
+				}
+				else if(source==eyeYSlider) {
+					if (!source.getValueIsAdjusting())
+						eyeYTF.setValue((double)source.getValue()/100);
+					else
+						eyeYTF.setText("" + (double)source.getValue()/100);
+				}
+				else if(source==eyeZSlider) {
+					if (!source.getValueIsAdjusting())
+						eyeZTF.setValue((double)source.getValue()/100);
+					else
+						eyeZTF.setText("" + (double)source.getValue()/100);
+				}
 
-					reDesenhar();
+				reDesenhar();
 			}
 		};
 
@@ -587,33 +630,29 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		c.gridx++;
 		tabAxon.add(bMTF, c);
 
-		
-		
+
+
 		/*
 		 * Perspectiva tab
 		 */
 
 		// eyeX eyeY eyeZ centerX centerY centerZ upX upY upZ
-		
+
 		Hashtable<Integer, JLabel> persLabelTable =
 				new Hashtable<Integer, JLabel>();
 		persLabelTable.put(new Integer(-100), new JLabel("-1"));
-		//persLabelTable.put(new Integer(-75), new JLabel("-0.75"));
 		persLabelTable.put(new Integer(-50), new JLabel("-0.5"));
-		//persLabelTable.put(new Integer(-25), new JLabel("-0.25"));
 		persLabelTable.put(new Integer(0), new JLabel("0"));
-		//persLabelTable.put(new Integer(25), new JLabel("0.25"));
 		persLabelTable.put(new Integer(50), new JLabel("0.5"));
-		//persLabelTable.put(new Integer(75), new JLabel("0.75"));
 		persLabelTable.put(new Integer(100), new JLabel("1"));
 
-		
+
 		JLabel eyeLabel = new JLabel("eye x y z", JLabel.CENTER);
 		aLabel.setFont(new Font(aLabel.getName(), Font.PLAIN, 20));
 
 		JLabel centerLabel = new JLabel("center x y z", JLabel.CENTER);
 		bLabel.setFont(new Font(bLabel.getName(), Font.PLAIN, 20));
-		
+
 		eyeXSlider = new JSlider(JSlider.HORIZONTAL, -100, 100, 0);
 		eyeXSlider.setLabelTable(persLabelTable);
 		eyeXSlider.setPaintTicks(true);
@@ -637,7 +676,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		eyeZSlider.setMajorTickSpacing(20);
 		eyeZSlider.setMinorTickSpacing(10);
 		eyeZSlider.addChangeListener(eyeZListener);
-		
+
 		eyeXTF = new JFormattedTextField("0");
 		eyeXTF.setColumns(2);
 		eyeXTF.addPropertyChangeListener(eyeXTFListener);
@@ -647,10 +686,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		eyeZTF = new JFormattedTextField("0");
 		eyeZTF.setColumns(2);
 		eyeZTF.addPropertyChangeListener(eyeZTFListener);
-		
-		
-		
-		
+
+
+
+
 		tabPers.setLayout(new GridBagLayout());
 		GridBagConstraints cP = new GridBagConstraints();
 		tabPers.add(eyeLabel);
@@ -671,8 +710,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		tabAxon.add(bMSlider, c);
 		c.gridx++;
 		tabAxon.add(bMTF, c);*/
-		
-		
+
+
 
 		painel.setLayout(new GridLayout(1, 4));
 		tabs.addTab("Ortogonal", tabOrto);
@@ -694,18 +733,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	}
 
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) { }
-		else if(e.getKeyCode() == KeyEvent.VK_UP) {
-			zoom -= 0.01f;        
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_RIGHT) { }
-		else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-			zoom += 0.01f;
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_ADD) {
+		if(e.getKeyCode() == KeyEvent.VK_ADD) {
 			zoom -= 0.01f;
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_SUBTRACT) {
@@ -714,50 +742,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		else if(e.getKeyCode() == KeyEvent.VK_NUMPAD0) {
 			zoom = 1.0f;
 		}
-		
+
 		reDesenhar();
 
 	}  
-
-	public void keyReleased(KeyEvent e) {}
-
-
-	public static void main(String[] args) {
-		JFrame frame = new JFrame("Projections");
-		GLCanvas canvas = new GLCanvas();
-		canvas.addGLEventListener(new Casa3Dswing());
-		canvas.setSize(400, 280);
-		frame.add(canvas, BorderLayout.CENTER);
-		JPanel painel = criarPainel();
-		frame.add(painel, BorderLayout.SOUTH);
-		frame.pack();
-		frame.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);
-			}
-		});
-		canvas.requestFocusInWindow();
-		frame.setVisible(true);
-
-		tabs.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-
-				System.out.println(tabs.getSelectedIndex());
-
-				if(tabs.getSelectedIndex() == 0)
-					tabOp = 0;
-				else if(tabs.getSelectedIndex() == 1)
-					tabOp = 1;
-				else if(tabs.getSelectedIndex() == 2)
-					tabOp = 2;
-				else if(tabs.getSelectedIndex() == 3)
-					tabOp = 3;
-
-				reDesenhar();
-			}
-		}
-				);
-	}
 
 	private static GLAutoDrawable glDraw;
 
@@ -791,5 +779,163 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private static JFormattedTextField eyeZTF;
 
 	private static int tabOp = 0;
+
+	private static boolean wireframe = false;
+	private static boolean fill = false;
+	private static boolean texture = false;
+	private static File objFile = null;
+
+
+
+	public static void main(String[] args) {
+		JFrame frame = new JFrame("Projections");
+		GLCanvas canvas = new GLCanvas();
+		canvas.addGLEventListener(new Casa3Dswing());
+		canvas.setSize(400, 280);
+		frame.add(canvas, BorderLayout.CENTER);
+		JPanel painel = criarPainel();
+		frame.add(painel, BorderLayout.SOUTH);
+		JMenuBar barra = new JMenuBar();
+		barra.add(loadNewObject());
+		//        barra.add(loadNewTexture());
+		barra.add(visibilityOptions());
+		barra.add(about());       
+		frame.setJMenuBar(barra);
+		frame.pack();
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		canvas.requestFocusInWindow();
+		frame.setVisible(true);
+
+
+		tabs.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+
+				if(tabs.getSelectedIndex() == 0)
+					tabOp = 0;
+				else if(tabs.getSelectedIndex() == 1)
+					tabOp = 1;
+				else if(tabs.getSelectedIndex() == 2)
+					tabOp = 2;
+				else if(tabs.getSelectedIndex() == 3)
+					tabOp = 3;
+
+				reDesenhar();
+			}
+		}
+				);
+	}
+
+	private static JMenu loadNewObject() {
+		JMenu menu = new JMenu("Carregar objecto");
+		menu.add(loadObjectItem());
+		return menu;
+	}
+
+	private static JMenuItem loadObjectItem() {
+
+		JMenuItem item = new JMenuItem("Abrir...");
+		final JFileChooser fc = new JFileChooser();
+		final JFrame f = new JFrame();
+
+		class LoadObj implements ActionListener {
+			public void actionPerformed(ActionEvent e) {
+
+				int returnVal = fc.showOpenDialog(f);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					objFile = fc.getSelectedFile();
+					loadObject(glDraw);
+					reDesenhar();
+				}
+			}
+		}
+
+		item.addActionListener(new LoadObj());
+		return item;	
+	}
+
+	private static JMenu visibilityOptions() {
+		JMenu menu = new JMenu("Opções de visibilidade");
+		menu.add(visibilityItem("Malha de arame"));
+		menu.add(visibilityItem("Preencher poligonos"));
+		menu.add(visibilityItem("Aplicar textura"));
+		return menu;
+	}
+
+	private static JMenuItem visibilityItem(String texto) {
+		final JCheckBoxMenuItem item = new JCheckBoxMenuItem(texto);
+		class ListenerItemMenu implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e) {
+				if(e.getActionCommand().equals("Malha de arame")) {
+
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);				
+
+					wireframe = (wireframe) ? false : true;
+				}
+				else if(e.getActionCommand().equals("Preencher poligonos")) {
+
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);				
+
+					fill = (fill) ? false : true;					
+				}
+				else if(e.getActionCommand().equals("Aplicar textura")) {
+
+					if(item.isSelected())
+						item.setSelected(true); 
+					else
+						item.setSelected(false);				
+
+					texture = (texture) ? false : true;					
+				}
+			}	
+
+		}
+
+		item.addActionListener(new ListenerItemMenu());
+		return item;	
+	}
+
+	private static JMenuItem aboutItem(String texto) 
+	{
+		JMenuItem item = new JMenuItem(texto);
+
+		class ListenerItemMenu implements ActionListener
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if(e.getActionCommand().equals("About"))
+					JOptionPane.showMessageDialog(null, 
+							"Trabalho Pratico 2 \n - Vladislav Pinzhuro, 34224\n - Joao Costa, 41726");
+			}
+		}
+
+		item.addActionListener(new ListenerItemMenu());
+		return item;
+	}
+	private static JMenu about()
+	{
+		JMenu menu = new JMenu("Help");		
+
+		menu.add(aboutItem("About"));
+		return menu;
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
 
 }
