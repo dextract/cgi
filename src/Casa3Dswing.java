@@ -57,11 +57,11 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
     private float zoom = 1.0f;
     private float moveSideways = 0.0f;
-    private ArrayList<ArrayList<float[]>> faces;
-    private HashMap<Integer, float[]> vertices;
-    private ArrayList<float[]> texturesVt;
-    private float[] minVertices;
-    private float[] maxVertices;
+    private static ArrayList<ArrayList<float[]>> faces;
+    private static HashMap<Integer, float[]> vertices;
+    private static ArrayList<float[]> texturesVt;
+    private static float[] minVertices;
+    private static float[] maxVertices;
     private boolean textureShown;
 
      GLU glu = new GLU();
@@ -69,26 +69,35 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
      public void init(GLAutoDrawable gLDrawable) {
     	 
     	 glDraw = gLDrawable;
-         ObjectLoader ol = new ObjectLoader(); 
-    	 
-         try {
-             ol.load(objFile);
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
-         
-         if(objFile != null) { 
-	         faces = ol.getFaces();
-	         vertices = ol.getVertices();
-	         minVertices = ol.getMinVertices();
-	         maxVertices = ol.getMaxVertices();
-	         texturesVt = ol.getTexturesVt();
-         }
-        
+    	  
+    	if(objFile != null) 
+    		loadObject(glDraw);
+       
          GL gl = gLDrawable.getGL();
          gl.glEnable(GL.GL_DEPTH_TEST);
          gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
          glDraw.addKeyListener(this);
+     }
+     
+     private static void loadObject(GLAutoDrawable gLDrawable) {
+         ObjectLoader ol = new ObjectLoader(); 
+         
+    	 if(objFile != null) { 
+        	 System.out.println(1);
+	         try {
+	             ol.load(objFile);
+	         } catch (IOException e) {
+	             e.printStackTrace();
+	         }       
+         }
+    	 
+         
+         faces = ol.getFaces();
+         vertices = ol.getVertices();
+         minVertices = ol.getMinVertices();
+         maxVertices = ol.getMaxVertices();
+         texturesVt = ol.getTexturesVt();
+ 
      }
     
      public void display(GLAutoDrawable gLDrawable) {
@@ -526,6 +535,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	 
 	            if (returnVal == JFileChooser.APPROVE_OPTION) {
 	                objFile = fc.getSelectedFile();
+	                loadObject(glDraw);
 	                reDesenhar();
 	            }
 			}
