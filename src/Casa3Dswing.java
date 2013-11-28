@@ -53,7 +53,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private static ArrayList<float[]> texturesVt;
 	private static float[] minVertices;
 	private static float[] maxVertices;
-	private boolean textureLoaded;
+	private static boolean textureLoaded = false;
 
 	GLU glu = new GLU();
 
@@ -225,10 +225,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		gl.glTranslatef(-px, -py, -pz);
 
 
+		System.out.println(textureLoaded + " " + texture);
+		
+		if(textureLoaded && texture) {
 
-		if(!textureLoaded) {
-
-			File textureFile = new File("textures/leath01.png");
 			BufferedImage img = null;
 
 			try {
@@ -267,8 +267,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			case DataBuffer.TYPE_UNDEFINED:
 				break;
 			}
-
-			textureLoaded=true;
 		}
 		
 		if(fill) {
@@ -784,6 +782,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private static boolean fill = false;
 	private static boolean texture = false;
 	private static File objFile = null;
+	private static File textureFile = null;
 
 
 
@@ -830,15 +829,16 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	}
 
 	private static JMenu loadNewObject() {
-		JMenu menu = new JMenu("Carregar objecto");
+		JMenu menu = new JMenu("Carregar");
 		menu.add(loadObjectItem());
+		menu.add(loadTextureItem());
 		return menu;
 	}
 
 	private static JMenuItem loadObjectItem() {
 
-		JMenuItem item = new JMenuItem("Abrir...");
-		final JFileChooser fc = new JFileChooser();
+		JMenuItem item = new JMenuItem("Objectos...");
+		final JFileChooser fc = new JFileChooser("./objects");
 		final JFrame f = new JFrame();
 
 		class LoadObj implements ActionListener {
@@ -855,6 +855,29 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		}
 
 		item.addActionListener(new LoadObj());
+		return item;	
+	}
+	
+	private static JMenuItem loadTextureItem() {
+
+		JMenuItem item = new JMenuItem("Texturas...");
+		final JFileChooser fc = new JFileChooser("./textures");
+		final JFrame f = new JFrame();
+
+		class LoadTex implements ActionListener {
+			public void actionPerformed(ActionEvent e) {
+
+				int returnVal = fc.showOpenDialog(f);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					textureFile = fc.getSelectedFile();
+					textureLoaded = true;
+					reDesenhar();
+				}
+			}
+		}
+
+		item.addActionListener(new LoadTex());
 		return item;	
 	}
 
@@ -896,7 +919,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 					else
 						item.setSelected(false);				
 
-					texture = (texture) ? false : true;					
+					texture = (texture) ? false : true;			
+					reDesenhar();
 				}
 			}	
 
