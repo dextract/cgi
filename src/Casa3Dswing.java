@@ -1,6 +1,7 @@
 import javax.swing.*;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -12,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
-
 import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -336,6 +336,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		class RadioButtonListener implements ActionListener {		
 
 			public void actionPerformed(ActionEvent event) {
+				updateScreen();
+				
 				reDesenhar();
 			}
 		}
@@ -399,6 +401,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 						eyeZTF.setText("" + (double)source.getValue()/100);
 				}
 
+				updateScreen();
+				
 				reDesenhar();
 			}
 		};
@@ -436,6 +440,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 					else if(source==eyeZTF)
 						eyeZSlider.setValue(value);
 
+					updateScreen();
+					
 					reDesenhar();
 				}
 			}
@@ -962,4 +968,24 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	}
 
 
+    private static void updateScreen() {
+        
+
+        // NOTE: Here we need a workaround for the HW/LW Mixing feature to work
+        // correctly due to yet unfixed bug 6852592.
+        // The JTextField is a validate root, so the revalidate() method called
+        // during the setText() operation does not validate the parent of the
+        // component. Therefore, we need to force validating its parent here.
+        Container parent = painel.getParent();
+        if (parent instanceof JComponent) {
+            ((JComponent)parent).revalidate();
+        }
+
+        // ... and just in case, call validate() on the top-level window as well
+        /*Window window = SwingUtilities.getWindowAncestor(jTextField1);
+        if (window != null) {
+            window.validate();
+        }*/
+    }
+	
 }
