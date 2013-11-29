@@ -74,7 +74,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		ObjectLoader ol = new ObjectLoader(); 
 
 		if(objFile != null) { 
-			System.out.println(1);
 			try {
 				ol.load(objFile);
 			} catch (IOException e) {
@@ -220,22 +219,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 		}
 
-
-		// center the model
-		gl.glTranslatef(-px, -py, -pz);
-
-
-		System.out.println(textureLoaded + " " + texture);
-		
 		if(textureLoaded && texture) {
-
-			BufferedImage img = null;
-
-			try {
-				img = ImageIO.read(textureFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}   
+			
 			WritableRaster raster = img.getRaster();   
 			int widthR = raster.getWidth();   
 			int heightR = raster.getHeight();   
@@ -267,8 +252,12 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			case DataBuffer.TYPE_UNDEFINED:
 				break;
 			}
-		}
 		
+		}
+
+		// center the model
+		gl.glTranslatef(-px, -py, -pz);
+			
 		if(fill) {
 			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
 			gl.glColor3f(0.7f, 0.7f, 0.7f);
@@ -345,6 +334,14 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		class SliderListener implements ChangeListener {
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
+				
+				if(aSlider.getValue() + bSlider.getValue() >= 90) {
+					if(source==aSlider)
+						aSlider.setValue(aSlider.getValue()-1);
+					else if(source==bSlider)
+						bSlider.setValue(bSlider.getValue()-1);				
+				}
+
 
 				if(source==lSlider) {
 					if (!source.getValueIsAdjusting())
@@ -572,6 +569,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 		JLabel bLabel = new JLabel("B (°)(')", JLabel.CENTER);
 		bLabel.setFont(new Font(bLabel.getName(), Font.PLAIN, 20));
+	
 
 		aSlider = new JSlider(JSlider.HORIZONTAL, 0, 90, 24);
 		aSlider.setPaintTicks(true);
@@ -601,6 +599,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		bMSlider.setMinorTickSpacing(5);
 		bMSlider.addChangeListener(bMListener);
 
+		
 		aTF = new JFormattedTextField("24");
 		aTF.setColumns(2);
 		aTF.addPropertyChangeListener(aTFListener);
@@ -781,9 +780,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private static JFormattedTextField eyeXTF;
 	private static JFormattedTextField eyeYTF;
 	private static JFormattedTextField eyeZTF;
-
+	private static BufferedImage img = null;
 	private static int tabOp = 0;
-
 	private static boolean wireframe = false;
 	private static boolean fill = false;
 	private static boolean texture = false;
@@ -802,7 +800,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		frame.add(painel, BorderLayout.SOUTH);
 		JMenuBar barra = new JMenuBar();
 		barra.add(loadNewObject());
-		//        barra.add(loadNewTexture());
 		barra.add(visibilityOptions());
 		barra.add(about());       
 		frame.setJMenuBar(barra);
@@ -878,6 +875,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					textureFile = fc.getSelectedFile();
 					textureLoaded = true;
+					loadTexture(glDraw);
 					reDesenhar();
 				}
 			}
@@ -885,6 +883,16 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 		item.addActionListener(new LoadTex());
 		return item;	
+	}
+	
+	private static void loadTexture(GLAutoDrawable gLDrawable) {
+		
+
+			try {
+				img = ImageIO.read(textureFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}   	
 	}
 
 	private static JMenu visibilityOptions() {
