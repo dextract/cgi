@@ -152,7 +152,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 						-r, r);
 
 
-			double l = Double.parseDouble(lTF.getText());
+			double l = Double.parseDouble(lTF.getText().replace(',','.'));
 			double alpha = Math.toRadians(Integer.parseInt(alphaTF.getText()));
 
 			double[] m = {  1,0,-l*Math.cos(alpha),0,
