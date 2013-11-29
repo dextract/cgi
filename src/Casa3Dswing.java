@@ -47,7 +47,13 @@ import javax.media.opengl.glu.GLU;
 public class Casa3Dswing implements GLEventListener, KeyListener { 
 
 
-	private float zoom = 1.0f;
+	private static float zoom = 1.0f;
+	private static float frustumL = 0.0f;
+	private static float frustumR = 0.0f;
+	private static float frustumB = 0.0f;
+	private static float frustumT = 0.0f;
+	private static float frustumZN = 0.0f;
+	private static float frustumZF = 0.0f;
 	private static ArrayList<ArrayList<float[]>> faces;
 	private static HashMap<Integer, float[]> vertices;
 	private static ArrayList<float[]> texturesVt;
@@ -199,7 +205,9 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				right *= aspect;
 			}
 
-			gl.glFrustum(left*zoom, right*zoom, bottom*zoom, top*zoom, zNear, zFar);
+			gl.glFrustum((left+frustumL)*zoom, (right+frustumR)*zoom,
+					(bottom+frustumB)*zoom, (top+frustumT)*zoom,
+					zNear+frustumZN, zFar+frustumZF);
 
 		}
 
@@ -235,7 +243,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				gl.glGenTextures( 1, textureId, 0 );
 				gl.glBindTexture( GL.GL_TEXTURE_2D, textureId[0] );
 				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
-				//				GL.GL_DECAL);
+				//		GL.GL_DECAL);
 				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
 						GL.GL_REPEAT);				
 				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
@@ -330,18 +338,50 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				reDesenhar();
 			}
 		}
+		
+		class SpinnerListener implements ChangeListener {
+
+			public void stateChanged(ChangeEvent event) {
+				JSpinner source = (JSpinner) event.getSource();
+				
+				Object nValue = source.getValue();
+				double value = 0;
+				value = (Double)nValue;
+				
+				
+				
+				
+				if(source==frustumLSpinner)
+					frustumL = (float) value;
+				else if(source==frustumRSpinner)
+					frustumR = (float) value;
+				else if(source==frustumBSpinner)
+					frustumB = (float) value;
+				else if(source==frustumTSpinner)
+					frustumT = (float) value;
+				else if(source==frustumZNSpinner)
+					frustumZN = (float) value;
+				else if(source==frustumZFSpinner)
+					frustumZF = (float) value;
+				
+				updateScreen();
+				
+				reDesenhar();
+				
+			}
+			
+		}
 
 		class SliderListener implements ChangeListener {
+			int safeValue;
+			
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
 				
-				if(aSlider.getValue() + bSlider.getValue() >= 90) {
-					if(source==aSlider)
-						aSlider.setValue(aSlider.getValue()-1);
-					else if(source==bSlider)
-						bSlider.setValue(bSlider.getValue()-1);				
-				}
-
+				if(aSlider.getValue() + bSlider.getValue() < 90)
+					safeValue = source.getValue();
+				else
+					source.setValue(safeValue);
 
 				if(source==lSlider) {
 					if (!source.getValueIsAdjusting())
@@ -465,6 +505,13 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		TextListener eyeXTFListener = new TextListener();
 		TextListener eyeYTFListener = new TextListener();
 		TextListener eyeZTFListener = new TextListener();
+		
+		SpinnerListener frustumLListener = new SpinnerListener();
+		SpinnerListener frustumRListener = new SpinnerListener();
+		SpinnerListener frustumBListener = new SpinnerListener();
+		SpinnerListener frustumTListener = new SpinnerListener();
+		SpinnerListener frustumZNListener = new SpinnerListener();
+		SpinnerListener frustumZFListener = new SpinnerListener();
 
 
 		/*
@@ -542,11 +589,11 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		lSlider.add(lLabel);
 		lSlider.addChangeListener(lListener);
 
-		alphaTF = new JFormattedTextField("45");
+		alphaTF = new JFormattedTextField(alphaSlider.getValue());
 		alphaTF.setColumns(2);
 		alphaTF.addPropertyChangeListener(alphaTFListener);
 
-		lTF = new JFormattedTextField("0.5");
+		lTF = new JFormattedTextField((float)lSlider.getValue()/100);
 		lTF.setColumns(3);
 		lTF.addPropertyChangeListener(lTFListener);
 
@@ -600,17 +647,17 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		bMSlider.addChangeListener(bMListener);
 
 		
-		aTF = new JFormattedTextField("24");
+		aTF = new JFormattedTextField(aSlider.getValue());
 		aTF.setColumns(2);
 		aTF.addPropertyChangeListener(aTFListener);
-		aMTF = new JFormattedTextField("46");
+		aMTF = new JFormattedTextField(aMSlider.getValue());
 		aMTF.setColumns(2);
 		aMTF.addPropertyChangeListener(aMTFListener);
 
-		bTF = new JFormattedTextField("17");
+		bTF = new JFormattedTextField(bSlider.getValue());
 		bTF.addPropertyChangeListener(bTFListener);
 		bTF.setColumns(2);
-		bMTF = new JFormattedTextField("0");
+		bMTF = new JFormattedTextField(bMSlider.getValue());
 		bMTF.setColumns(2);
 		bMTF.addPropertyChangeListener(bMTFListener);
 
@@ -639,8 +686,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		 * Perspectiva tab
 		 */
 
-		// eyeX eyeY eyeZ centerX centerY centerZ upX upY upZ
-
 		Hashtable<Integer, JLabel> persLabelTable =
 				new Hashtable<Integer, JLabel>();
 		persLabelTable.put(new Integer(-100), new JLabel("-1"));
@@ -651,10 +696,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 
 		JLabel eyeLabel = new JLabel("eye x y z", JLabel.CENTER);
-		aLabel.setFont(new Font(aLabel.getName(), Font.PLAIN, 20));
-
-		JLabel centerLabel = new JLabel("center x y z", JLabel.CENTER);
-		bLabel.setFont(new Font(bLabel.getName(), Font.PLAIN, 20));
+		JLabel frustumLabel = new JLabel("l r b t zN zF", JLabel.CENTER);
 
 		eyeXSlider = new JSlider(JSlider.HORIZONTAL, -100, 100, 0);
 		eyeXSlider.setLabelTable(persLabelTable);
@@ -689,12 +731,29 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		eyeZTF = new JFormattedTextField("0");
 		eyeZTF.setColumns(2);
 		eyeZTF.addPropertyChangeListener(eyeZTFListener);
-
-
+		
+		SpinnerModel model = new SpinnerNumberModel(0, -100, 100, 0.1);
+		SpinnerModel model1 = new SpinnerNumberModel(0, -100, 100, 0.1);
+		SpinnerModel model2 = new SpinnerNumberModel(0, -100, 100, 0.1);
+		SpinnerModel model3 = new SpinnerNumberModel(0, -100, 100, 0.1);
+		SpinnerModel model4 = new SpinnerNumberModel(0, -100, 100, 0.1);
+		SpinnerModel model5 = new SpinnerNumberModel(0, -100, 100, 0.1);
+		frustumLSpinner = new JSpinner(model);
+		frustumRSpinner = new JSpinner(model1);
+		frustumBSpinner = new JSpinner(model2);
+		frustumTSpinner = new JSpinner(model3);
+		frustumZNSpinner = new JSpinner(model4);
+		frustumZFSpinner = new JSpinner(model5);
+	
+		frustumLSpinner.addChangeListener(frustumLListener);
+		frustumRSpinner.addChangeListener(frustumRListener);
+		frustumBSpinner.addChangeListener(frustumBListener);
+		frustumTSpinner.addChangeListener(frustumTListener);
+		frustumZNSpinner.addChangeListener(frustumZNListener);
+		frustumZFSpinner.addChangeListener(frustumZFListener);
 
 
 		tabPers.setLayout(new GridBagLayout());
-		GridBagConstraints cP = new GridBagConstraints();
 		tabPers.add(eyeLabel);
 		tabPers.add(eyeXSlider);
 		tabPers.add(eyeXTF);
@@ -702,17 +761,21 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		tabPers.add(eyeYTF);
 		tabPers.add(eyeZSlider);
 		tabPers.add(eyeZTF);
-		/*c.gridx = 0;
+		c.gridx = 0;
 		c.gridy = 1;
-		tabAxon.add(bLabel, c);
+		tabPers.add(frustumLabel, c);
 		c.gridx++;
-		tabAxon.add(bSlider, c);
+		tabPers.add(frustumLSpinner, c);
 		c.gridx++;
-		tabAxon.add(bTF, c);
+		tabPers.add(frustumRSpinner, c);
 		c.gridx++;
-		tabAxon.add(bMSlider, c);
+		tabPers.add(frustumBSpinner, c);
 		c.gridx++;
-		tabAxon.add(bMTF, c);*/
+		tabPers.add(frustumTSpinner, c);
+		c.gridx++;
+		tabPers.add(frustumZNSpinner, c);
+		c.gridx++;
+		tabPers.add(frustumZFSpinner, c);
 
 
 
@@ -780,6 +843,12 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private static JFormattedTextField eyeXTF;
 	private static JFormattedTextField eyeYTF;
 	private static JFormattedTextField eyeZTF;
+	private static JSpinner frustumLSpinner;
+	private static JSpinner frustumRSpinner;
+	private static JSpinner frustumBSpinner;
+	private static JSpinner frustumTSpinner;
+	private static JSpinner frustumZNSpinner;
+	private static JSpinner frustumZFSpinner;
 	private static BufferedImage img = null;
 	private static int tabOp = 0;
 	private static boolean wireframe = false;
@@ -787,10 +856,14 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private static boolean texture = false;
 	private static File objFile = null;
 	private static File textureFile = null;
-
+	private static JMenuItem textureItem = null;
+	private static JMenuItem wireframeVisItem = null;
+	private static JMenuItem fillVisItem = null;
+	private static JMenuItem textureVisItem = null;
 
 
 	public static void main(String[] args) {
+
 		JFrame frame = new JFrame("Projections");
 		GLCanvas canvas = new GLCanvas();
 		canvas.addGLEventListener(new Casa3Dswing());
@@ -798,6 +871,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		frame.add(canvas, BorderLayout.CENTER);
 		JPanel painel = criarPainel();
 		frame.add(painel, BorderLayout.SOUTH);
+
 		JMenuBar barra = new JMenuBar();
 		barra.add(loadNewObject());
 		barra.add(visibilityOptions());
@@ -811,7 +885,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		});
 		canvas.requestFocusInWindow();
 		frame.setVisible(true);
-
 
 		tabs.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -827,15 +900,61 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 				reDesenhar();
 			}
-		}
-				);
+		});
 	}
 
 	private static JMenu loadNewObject() {
 		JMenu menu = new JMenu("Carregar");
 		menu.add(loadObjectItem());
-		menu.add(loadTextureItem());
+		textureItem = loadTextureItem(); 
+		menu.add(textureItem);
+		menu.add(resetApp());
 		return menu;
+	}
+	
+	private static JMenuItem resetApp() {
+		
+		JMenuItem item = new JMenuItem("Reset");
+		
+		class Reset implements ActionListener {
+
+			public void actionPerformed(ActionEvent arg0) {
+				frustumL = 0.0f;
+				frustumR = 0.0f;
+				frustumB = 0.0f;
+				frustumT = 0.0f;
+				frustumZN = 0.0f;
+				frustumZF = 0.0f;
+				zoom = 1.0f;
+				objFile = null;
+				textureItem.setEnabled(false);
+				wireframeVisItem.setSelected(false);
+				fillVisItem.setSelected(false);
+				textureVisItem.setSelected(false);
+				alphaSlider.setValue(45);
+				lSlider.setValue(50);
+				aSlider.setValue(24);
+				aMSlider.setValue(46);
+				bSlider.setValue(17);
+				bMSlider.setValue(0);
+				eyeXSlider.setValue(0);
+				eyeYSlider.setValue(0);
+				eyeZSlider.setValue(0);
+				frustumLSpinner.setValue(0.0);
+				frustumRSpinner.setValue(0.0);
+				frustumBSpinner.setValue(0.0);
+				frustumTSpinner.setValue(0.0);
+				frustumZNSpinner.setValue(0.0);
+				frustumZFSpinner.setValue(0.0);
+				tabs.setSelectedIndex(0);
+				pri.setSelected(true);
+			}
+			
+		}
+		
+		item.addActionListener(new Reset());
+		
+		return item;
 	}
 
 	private static JMenuItem loadObjectItem() {
@@ -852,6 +971,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					objFile = fc.getSelectedFile();
 					loadObject(glDraw);
+					textureItem.setEnabled(true);
 					reDesenhar();
 				}
 			}
@@ -862,8 +982,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	}
 	
 	private static JMenuItem loadTextureItem() {
-
 		JMenuItem item = new JMenuItem("Texturas...");
+		item.setEnabled(false);
 		final JFileChooser fc = new JFileChooser("./textures");
 		final JFrame f = new JFrame();
 
@@ -886,20 +1006,21 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	}
 	
 	private static void loadTexture(GLAutoDrawable gLDrawable) {
-		
-
-			try {
-				img = ImageIO.read(textureFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}   	
+		try {
+			img = ImageIO.read(textureFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}   	
 	}
 
 	private static JMenu visibilityOptions() {
 		JMenu menu = new JMenu("Opções de visibilidade");
-		menu.add(visibilityItem("Malha de arame"));
-		menu.add(visibilityItem("Preencher poligonos"));
-		menu.add(visibilityItem("Aplicar textura"));
+		wireframeVisItem = visibilityItem("Malha de arame");
+		fillVisItem = visibilityItem("Preencher poligonos");
+		textureVisItem = visibilityItem("Aplicar textura");
+		menu.add(wireframeVisItem);
+		menu.add(fillVisItem);
+		menu.add(textureVisItem);  
 		return menu;
 	}
 
