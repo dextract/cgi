@@ -151,8 +151,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom,
 						-r, r);
 
-
-			double l = Double.parseDouble(lTF.getText());
+			double l = Double.parseDouble(lTF.getText().replace(',','.'));
 			double alpha = Math.toRadians(Integer.parseInt(alphaTF.getText()));
 
 			double[] m = {  1,0,-l*Math.cos(alpha),0,
@@ -227,7 +226,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 		}
 
-		if(textureLoaded && texture) {
+		if(textureLoaded && texture && !textureInPipe) {
 			
 			WritableRaster raster = img.getRaster();   
 			int widthR = raster.getWidth();   
@@ -256,6 +255,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 						0, GL.GL_BGR, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(im));
 				gl.glEnable(GL.GL_TEXTURE_2D);
 
+				textureInPipe = true;
 				break;
 			case DataBuffer.TYPE_UNDEFINED:
 				break;
@@ -283,7 +283,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			gl.glBegin(GL.GL_POLYGON);
 			while(it.hasNext()) {
 				float[] el = it.next();
-				if(texture) {
+				if(texture && textureLoaded) {
 					if(el[1]!=0) {    // se textura aplicavel ao vertice
 						ptsT = texturesVt.get((int)el[1]-1);
 						gl.glTexCoord2d(ptsT[0],ptsT[1]);
@@ -579,7 +579,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		alphaSlider.setMinorTickSpacing(5);
 		alphaSlider.add(alphaLabel);
 		alphaSlider.addChangeListener(alphaListener);
-
+		
 		lSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);  
 		lSlider.setLabelTable(axonLabelTable);
 		lSlider.setPaintTicks(true);
@@ -616,7 +616,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 		JLabel bLabel = new JLabel("B (°)(')", JLabel.CENTER);
 		bLabel.setFont(new Font(bLabel.getName(), Font.PLAIN, 20));
-	
 
 		aSlider = new JSlider(JSlider.HORIZONTAL, 0, 90, 24);
 		aSlider.setPaintTicks(true);
@@ -625,13 +624,14 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		aSlider.setMinorTickSpacing(5);
 		aSlider.add(aLabel);
 		aSlider.addChangeListener(aListener);
+		
 		aMSlider = new JSlider(JSlider.HORIZONTAL, 0, 59, 46);
 		aMSlider.setPaintTicks(true);
 		aMSlider.setPaintLabels(true);
 		aMSlider.setMajorTickSpacing(10);
 		aMSlider.setMinorTickSpacing(5);
 		aMSlider.addChangeListener(aMListener);
-
+		
 		bSlider = new JSlider(JSlider.HORIZONTAL, 0, 90, 17);  
 		bSlider.setPaintTicks(true);
 		bSlider.setPaintLabels(true);
@@ -639,17 +639,18 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		bSlider.setMinorTickSpacing(5);
 		bSlider.add(bLabel);
 		bSlider.addChangeListener(bListener);
+		
 		bMSlider = new JSlider(JSlider.HORIZONTAL, 0, 59, 0);  
 		bMSlider.setPaintTicks(true);
 		bMSlider.setPaintLabels(true);
 		bMSlider.setMajorTickSpacing(10);
 		bMSlider.setMinorTickSpacing(5);
 		bMSlider.addChangeListener(bMListener);
-
 		
 		aTF = new JFormattedTextField(aSlider.getValue());
 		aTF.setColumns(2);
 		aTF.addPropertyChangeListener(aTFListener);
+		
 		aMTF = new JFormattedTextField(aMSlider.getValue());
 		aMTF.setColumns(2);
 		aMTF.addPropertyChangeListener(aMTFListener);
@@ -657,6 +658,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		bTF = new JFormattedTextField(bSlider.getValue());
 		bTF.addPropertyChangeListener(bTFListener);
 		bTF.setColumns(2);
+		
 		bMTF = new JFormattedTextField(bMSlider.getValue());
 		bMTF.setColumns(2);
 		bMTF.addPropertyChangeListener(bMTFListener);
@@ -679,7 +681,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		tabAxon.add(bMSlider, c);
 		c.gridx++;
 		tabAxon.add(bMTF, c);
-
 
 
 		/*
@@ -723,13 +724,15 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		eyeZSlider.addChangeListener(eyeZListener);
 
 		eyeXTF = new JFormattedTextField("0");
-		eyeXTF.setColumns(2);
+		eyeXTF.setColumns(3);
 		eyeXTF.addPropertyChangeListener(eyeXTFListener);
+		
 		eyeYTF = new JFormattedTextField("0");
-		eyeYTF.setColumns(2);
+		eyeYTF.setColumns(3);
 		eyeYTF.addPropertyChangeListener(eyeYTFListener);
+		
 		eyeZTF = new JFormattedTextField("0");
-		eyeZTF.setColumns(2);
+		eyeZTF.setColumns(3);
 		eyeZTF.addPropertyChangeListener(eyeZTFListener);
 		
 		SpinnerModel model = new SpinnerNumberModel(0, -100, 100, 0.1);
@@ -778,7 +781,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		tabPers.add(frustumZFSpinner, c);
 
 
-
 		painel.setLayout(new GridLayout(1, 4));
 		tabs.addTab("Ortogonal", tabOrto);
 		tabs.addTab("Obliqua", tabOblq);
@@ -808,7 +810,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		else if(e.getKeyCode() == KeyEvent.VK_NUMPAD0) {
 			zoom = 1.0f;
 		}
-
 		reDesenhar();
 
 	}  
@@ -860,6 +861,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	private static JMenuItem wireframeVisItem = null;
 	private static JMenuItem fillVisItem = null;
 	private static JMenuItem textureVisItem = null;
+	private static boolean textureInPipe = false;
 
 
 	public static void main(String[] args) {
@@ -927,10 +929,14 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				frustumZF = 0.0f;
 				zoom = 1.0f;
 				objFile = null;
+				textureFile = null;
+				textureLoaded = false;
+				textureInPipe = false;
 				textureItem.setEnabled(false);
 				wireframeVisItem.setSelected(false);
 				fillVisItem.setSelected(false);
 				textureVisItem.setSelected(false);
+				textureVisItem.setEnabled(false);
 				alphaSlider.setValue(45);
 				lSlider.setValue(50);
 				aSlider.setValue(24);
@@ -948,6 +954,9 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				frustumZFSpinner.setValue(0.0);
 				tabs.setSelectedIndex(0);
 				pri.setSelected(true);
+				texture = false;
+				wireframe = false;
+				fill = false;
 			}
 			
 		}
