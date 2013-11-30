@@ -951,12 +951,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				texture=false;
 				wireframe = false;
 				fill = false;
-				if(visibilityItem("Malha de arame").isSelected());
-					visibilityItem("Malha de arame").setSelected(false);
-				if(visibilityItem("Preencher poligonos").isSelected());
-					visibilityItem("Preencher poligonos").setSelected(false);
-				if(visibilityItem("Aplicar textura").isSelected());
-					visibilityItem("Aplicar textura").setSelected(false);
 			}
 			
 		}
