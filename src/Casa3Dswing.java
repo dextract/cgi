@@ -11,8 +11,6 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
@@ -42,10 +40,9 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
-
 /**
- * @author
- * 
+ * @author Vladislav Pinzhuro, 34224
+ * @author Joao Costa, 41726
  */
 public class Casa3Dswing implements GLEventListener, KeyListener { 
 

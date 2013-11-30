@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-
+/**
+ * @author Vladislav Pinzhuro, 34224
+ * @author Joao Costa, 41726
+ */
 class ObjectLoader {
     
     private final static String OBJ_VERTEX = "v";
