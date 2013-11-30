@@ -1,6 +1,7 @@
 import javax.swing.*;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -10,6 +11,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
@@ -242,8 +245,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				gl.glActiveTexture(1);
 				gl.glGenTextures( 1, textureId, 0 );
 				gl.glBindTexture( GL.GL_TEXTURE_2D, textureId[0] );
-				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
-				//		GL.GL_DECAL);
 				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
 						GL.GL_REPEAT);				
 				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
@@ -263,10 +264,14 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			}
 		
 		}
+		
+		if(!texture)
+			gl.glDisable(GL.GL_TEXTURE_2D);
+		else
+			gl.glEnable(GL.GL_TEXTURE_2D);
 
 		// center the model
 		gl.glTranslatef(-px, -py, -pz);
-			
 		if(fill) {
 			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
 			gl.glColor3f(0.7f, 0.7f, 0.7f);
@@ -290,6 +295,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 						gl.glTexCoord2d(ptsT[0],ptsT[1]);
 					}
 				}
+
 				pts = vertices.get((int)el[0]-1);
 				gl.glVertex3f(pts[0],pts[1],pts[2]);
 			}
@@ -326,6 +332,8 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 			boolean deviceChanged) {}
 
 	public static void reDesenhar() {
+		Component[] components = painel.getParent().getComponents();
+		components[0].requestFocusInWindow(); // canvas focus
 		glDraw.display();
 	}
 
@@ -802,6 +810,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 	}
 
 	public void keyPressed(KeyEvent e) {
+
 		if(e.getKeyCode() == KeyEvent.VK_ADD) {
 			zoom -= 0.01f;
 		}
@@ -810,6 +819,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_NUMPAD0) {
 			zoom = 1.0f;
+			
 		}
 		reDesenhar();
 
@@ -871,10 +881,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		GLCanvas canvas = new GLCanvas();
 		canvas.addGLEventListener(new Casa3Dswing());
 		canvas.setSize(400, 280);
+		canvas.setFocusable(true);
 		frame.add(canvas, BorderLayout.CENTER);
 		JPanel painel = criarPainel();
 		frame.add(painel, BorderLayout.SOUTH);
-
 		JMenuBar barra = new JMenuBar();
 		barra.add(loadNewObject());
 		barra.add(visibilityOptions());
@@ -904,6 +914,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				reDesenhar();
 			}
 		});
+	
 	}
 
 	private static JMenu loadNewObject() {
@@ -1109,29 +1120,15 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 
     private static void updateScreen() {
-        
-
-        // NOTE: Here we need a workaround for the HW/LW Mixing feature to work
-        // correctly due to yet unfixed bug 6852592.
-        // The JTextField is a validate root, so the revalidate() method called
-        // during the setText() operation does not validate the parent of the
-        // component. Therefore, we need to force validating its parent here.
         Container parent = painel.getParent();
         if (parent instanceof JComponent) {
             ((JComponent)parent).revalidate();
         }
-
-        // ... and just in case, call validate() on the top-level window as well
-        /*Window window = SwingUtilities.getWindowAncestor(jTextField1);
-        if (window != null) {
-            window.validate();
-        }*/
     }
 	
 }
