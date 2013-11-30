@@ -151,6 +151,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				gl.glOrtho(-r*aspect*zoom, r*aspect*zoom, -r*zoom, r*zoom,
 						-r, r);
 
+			
 			double l = Double.parseDouble(lTF.getText().replace(',','.'));
 			double alpha = Math.toRadians(Integer.parseInt(alphaTF.getText()));
 
@@ -1004,6 +1005,7 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					textureFile = fc.getSelectedFile();
 					textureLoaded = true;
+					textureInPipe = false;
 					loadTexture(glDraw);
 					reDesenhar();
 				}
