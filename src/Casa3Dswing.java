@@ -262,13 +262,16 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 		
 		}
 		
+		// center the model
+		gl.glTranslatef(-px, -py, -pz);
+		
 		if(!texture)
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		else
 			gl.glEnable(GL.GL_TEXTURE_2D);
-
-		// center the model
-		gl.glTranslatef(-px, -py, -pz);
+		if(texturesVt.size()==0)
+			gl.glDisable(GL.GL_TEXTURE_2D);	
+		
 		if(fill) {
 			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL);
 			gl.glColor3f(0.7f, 0.7f, 0.7f);
@@ -292,7 +295,6 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 						gl.glTexCoord2d(ptsT[0],ptsT[1]);
 					}
 				}
-
 				pts = vertices.get((int)el[0]-1);
 				gl.glVertex3f(pts[0],pts[1],pts[2]);
 			}
