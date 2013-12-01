@@ -380,14 +380,10 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 
 		class SliderListener implements ChangeListener {
 			int safeValue;
+			int safeValueM;
 			
 			public void stateChanged(ChangeEvent event) {
 				JSlider source = (JSlider) event.getSource();
-				
-				if(aSlider.getValue() + bSlider.getValue() < 90)
-					safeValue = source.getValue();
-				else
-					source.setValue(safeValue);
 
 				if(source==lSlider) {
 					if (!source.getValueIsAdjusting())
@@ -402,24 +398,42 @@ public class Casa3Dswing implements GLEventListener, KeyListener {
 						alphaTF.setText("" + source.getValue());
 				}
 				else if(source==aSlider) {
+					if(aSlider.getValue() + bSlider.getValue() < 90)
+						safeValue = source.getValue();
+					else
+						source.setValue(safeValue);
 					if (!source.getValueIsAdjusting()) 
 						aTF.setValue(source.getValue());
 					else
 						aTF.setText("" + source.getValue());
 				}
 				else if(source==bSlider) {
+					if(aSlider.getValue() + bSlider.getValue() < 90)
+						safeValue = source.getValue();
+					else
+						source.setValue(safeValue);
 					if (!source.getValueIsAdjusting())
 						bTF.setValue(source.getValue());
 					else
 						bTF.setText("" + source.getValue());
 				}
 				else if(source==aMSlider) {
+					if(	(aSlider.getValue() + bSlider.getValue() == 89) &&
+						(aMSlider.getValue() + bMSlider.getValue() >= 60) )
+							source.setValue(safeValue);
+					else
+						safeValue = source.getValue();
 					if (!source.getValueIsAdjusting())
 						aMTF.setValue(source.getValue());
 					else
 						aMTF.setText("" + source.getValue());
 				}
 				else if(source==bMSlider) {
+					if(	(aSlider.getValue() + bSlider.getValue() == 89) &&
+							(aMSlider.getValue() + bMSlider.getValue() >= 60) )
+								source.setValue(safeValue);
+						else
+							safeValue = source.getValue();
 					if (!source.getValueIsAdjusting())
 						bMTF.setValue(source.getValue());
 					else
